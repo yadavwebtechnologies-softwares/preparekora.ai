@@ -383,8 +383,10 @@
       searchResults.appendChild(a);
     });
   }
-
   if (searchOpenBtn) searchOpenBtn.addEventListener("click", openSearch);
+
+  const searchOpenMobile = document.getElementById("searchOpenMobile");
+  if (searchOpenMobile) searchOpenMobile.addEventListener("click", openSearch);
   if (searchCloseBtn) searchCloseBtn.addEventListener("click", closeSearch);
 
   if (searchOverlay) {
