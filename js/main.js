@@ -15,12 +15,7 @@
 
   const API_BASE = (function () {
     const host = window.location.hostname;
-    const isLocal =
-      host === "localhost" ||
-      host === "127.0.0.1" ||
-      host === "0.0.0.0" ||
-      host === "" ||
-      host.endsWith(".local");
+    const isLocal = host === "localhost" || host === "127.0.0.1" || host === "0.0.0.0" || host === "" || host.endsWith(".local");
     return isLocal ? "http://localhost:8787/api" : "https://preparekora-api.yadavsubba2003.workers.dev/api";
   })();
 
@@ -286,10 +281,8 @@
 
   /* ---------- Mobile menu ---------- */
 
-  const hamburgerSVG =
-    '<path d="M4 7h16"></path><path d="M4 12h16"></path><path d="M4 17h16"></path>';
-  const closeSVG =
-    '<path d="m6 6 12 12"></path><path d="M18 6 6 18"></path>';
+  const hamburgerSVG = '<path d="M4 7h16"></path><path d="M4 12h16"></path><path d="M4 17h16"></path>';
+  const closeSVG = '<path d="m6 6 12 12"></path><path d="M18 6 6 18"></path>';
 
   function closeMenu() {
     if (!menuPanel || !menuToggle || !menuIcon) return;
@@ -313,11 +306,7 @@
     });
 
     document.addEventListener("click", function (e) {
-      if (
-        menuPanel.classList.contains("open") &&
-        !menuPanel.contains(e.target) &&
-        !menuToggle.contains(e.target)
-      ) {
+      if (menuPanel.classList.contains("open") && !menuPanel.contains(e.target) && !menuToggle.contains(e.target)) {
         closeMenu();
       }
     });
