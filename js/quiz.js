@@ -53,13 +53,14 @@
   }
 
   /* ---------- State ---------- */
-
   const params = new URLSearchParams(window.location.search);
   const date = params.get("date") || "";
   const subjectId = params.get("subject") || "";
+  const slotParam = params.get("slot") || "";
 
   const state = {
     subjectName: "",
+    slot: "",
     questions: [],
     answers: {},
     index: 0,
@@ -95,9 +96,9 @@
         showError("Could not load quiz", (data && data.error) || ("HTTP " + res.status));
         return;
       }
-
       const data = await res.json();
       state.subjectName = data.subjectName || "Quiz";
+      state.slot = data.slot || slotParam || "";
       state.questions = Array.isArray(data.questions) ? data.questions : [];
       state.answers = {};
       state.index = 0;
@@ -264,13 +265,15 @@
         return;
       }
 
+      const resultSlot = data.slot || slotParam || "";
+
       // Store result for result page
       try {
-        sessionStorage.setItem("pk_quiz_result_" + date + "_" + subjectId, JSON.stringify(data));
+        sessionStorage.setItem("pk_quiz_result_" + date + "_" + subjectId + "_" + resultSlot, JSON.stringify(data));
       } catch (e) {}
 
       // Redirect to result
-      window.location.replace("result.html?date=" + encodeURIComponent(date) + "&subject=" + encodeURIComponent(subjectId));
+      window.location.replace("result.html?date=" + encodeURIComponent(date) + "&subject=" + encodeURIComponent(subjectId) + (resultSlot ? ("&slot=" + encodeURIComponent(resultSlot)) : ""));
     } catch (err) {
       toast("Network error. Try again.", "error");
       state.submitting = false;
