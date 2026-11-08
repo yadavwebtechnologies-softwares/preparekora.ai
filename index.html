@@ -129,6 +129,18 @@
         <a class="btn btn-sm" id="authActionBtn" href="login.html" style="display: none;">
           Sign in
         </a>
+        <button
+          class="icon-button"
+          id="searchOpen"
+          type="button"
+          aria-label="Open search"
+          title="Search"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="10.8" cy="10.8" r="6.8"></circle>
+            <path d="m16 16 4.5 4.5"></path>
+          </svg>
+        </button>
 
         <div class="lang-switch" role="group" aria-label="Language">
           <button class="lang-btn is-active" type="button" data-lang="en" aria-pressed="true">EN</button>
@@ -151,12 +163,14 @@
         </button>
 
       </div>
-
       <nav class="menu-panel" id="menuPanel" aria-label="Mobile navigation">
         <a href="about.html" data-i18n="navAbout">About</a>
         <a href="find-us.html" data-i18n="navFindUs">Find Us</a>
         <a href="admin.html">Administrator</a>
         <a href="login.html" id="authActionBtnMobile">Sign in</a>
+        <button type="button" id="searchOpenMobile" class="menu-panel-search-btn" style="display: block; width: 100%; padding: 12px; border-radius: 8px; border: 0; background: transparent; color: inherit; font-size: 14px; text-align: left; cursor: pointer; font: inherit;">
+          Search
+        </button>
 
         <div class="lang-switch" role="group" aria-label="Language">
           <button class="lang-btn is-active" type="button" data-lang="en" aria-pressed="true">EN</button>
