@@ -2,6 +2,8 @@
 
 (function () {
 
+  /* ---------- Strings ---------- */
+
   const STRINGS = {
     en: {
       navAbout: "About", navFindUs: "Find Us", navTerms: "Terms & Privacy",
@@ -371,6 +373,8 @@
     }
   };
 
+  /* ---------- Cache ---------- */
+
   const CACHE_KEY = "pk_translate_cache_v1";
   const MAX_CACHE = 1000;
   let cache = {};
@@ -389,7 +393,7 @@
         cache = trimmed;
       }
       localStorage.setItem(CACHE_KEY, JSON.stringify(cache));
-    } catch (e) { /* quota */ }
+    } catch (e) { /* quota exceeded — ignore */ }
   }
 
   function readSaved() {
@@ -399,6 +403,31 @@
     } catch (e) { /* ignore */ }
     return "en";
   }
+
+  /* ---------- API fallback (self-contained) ---------- */
+
+  const API_BASE = (function () {
+    const host = window.location.hostname;
+    const isLocal = host === "localhost" || host === "127.0.0.1" || host === "0.0.0.0" || host === "" || host.endsWith(".local");
+    return isLocal ? "http://localhost:8787/api" : "https://preparekora-api.yadavsubba2003.workers.dev/api";
+  })();
+
+  async function fetchTranslation(text, target) {
+    try {
+      const res = await fetch(API_BASE + "/translate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Accept": "application/json" },
+        body: JSON.stringify({ text: text, source: "en", target: target })
+      });
+      if (!res.ok) return text;
+      const data = await res.json();
+      return (data && data.translated && String(data.translated).trim()) || text;
+    } catch (e) {
+      return text;
+    }
+  }
+
+  /* ---------- PK object ---------- */
 
   const PK = {
     lang: readSaved(),
@@ -426,14 +455,12 @@
       const key = target + ":" + text.trim();
       if (cache[key]) return cache[key];
 
-      try {
-        const result = await window.PK_API.translate(text, target, "en");
-        const translated =
-          (result && result.translated && String(result.translated).trim()) || text;
+      const translated = await fetchTranslation(text, target);
+      if (translated && translated !== text) {
         cache[key] = translated;
         saveCache();
-        return translated;
-      } catch (err) { return text; }
+      }
+      return translated || text;
     },
 
     translateMany: async function (items, target) {
@@ -486,6 +513,8 @@
 
   window.PK = PK;
 
+  /* ---------- Apply all i18n ---------- */
+
   function applyAll() {
     document.documentElement.lang = PK.lang;
 
@@ -512,6 +541,8 @@
     });
   }
 
+  /* ---------- Event wiring ---------- */
+
   document.addEventListener("click", function (event) {
     const btn = event.target.closest(".lang-btn");
     if (!btn) return;
@@ -521,4 +552,5 @@
 
   document.addEventListener("DOMContentLoaded", applyAll);
   if (document.readyState !== "loading") applyAll();
+
 })();
