@@ -1,6 +1,9 @@
 "use strict";
 
 (function () {
+
+  /* ---------- Styles ---------- */
+
   if (!document.getElementById("pk-loader-styles")) {
     const style = document.createElement("style");
     style.id = "pk-loader-styles";
@@ -22,10 +25,14 @@
     document.head.appendChild(style);
   }
 
+  /* ---------- State ---------- */
+
   let el = null;
   let hideTimer = null;
   let startTime = 0;
   const MIN_DURATION = 350;
+
+  /* ---------- DOM ---------- */
 
   function ensure() {
     if (el && el.parentNode) return el;
@@ -37,6 +44,8 @@
     document.body.appendChild(el);
     return el;
   }
+
+  /* ---------- Control ---------- */
 
   function show() {
     const overlay = ensure();
@@ -57,5 +66,8 @@
     }, remaining);
   }
 
+  /* ---------- Expose ---------- */
+
   window.PKLoader = { show: show, hide: hide };
+
 })();
