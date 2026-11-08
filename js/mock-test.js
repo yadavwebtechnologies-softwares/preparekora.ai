@@ -4,15 +4,11 @@
 
   const API_BASE = (function () {
     const host = window.location.hostname;
-    const isLocal =
-      host === "localhost" || host === "127.0.0.1" ||
-      host === "0.0.0.0" || host === "" || host.endsWith(".local");
-    return isLocal
-      ? "http://localhost:8787/api"
-      : "https://preparekora-api.yadavsubba2003.workers.dev/api";
+    const isLocal = host === "localhost" || host === "127.0.0.1" || host === "0.0.0.0" || host === "" || host.endsWith(".local");
+    return isLocal ? "http://localhost:8787/api" : "https://preparekora-api.yadavsubba2003.workers.dev/api";
   })();
 
-    const USER_TOKEN_KEY = "pk_user_id_token";
+  const USER_TOKEN_KEY = "pk_user_id_token";
 
   function getUserToken() {
     try { return localStorage.getItem(USER_TOKEN_KEY) || ""; } catch (e) { return ""; }
@@ -152,7 +148,7 @@
   const retakeBtn       = document.getElementById("retakeBtn");
 
   const srStatus        = document.getElementById("srStatus");
-  
+
   const qLatex          = document.getElementById("qLatex");
   const qImage          = document.getElementById("qImage");
   const numericInput    = document.getElementById("numericInput");
@@ -194,7 +190,7 @@
     translatedPublisher: "",
     settings: { enabled: true, duration: 5 }
   };
-    window.MockTestState = state;
+  window.MockTestState = state;
 
   /* ---------- Interruption ---------- */
 
@@ -296,7 +292,8 @@
   function publisherLine(name) {
     return t("byLine", { name: name || "—" });
   }
-    /* ---------- Math / Reasoning helpers ---------- */
+
+  /* ---------- Math / Reasoning helpers ---------- */
 
   function getQuestionType(q) {
     if (!q || typeof q !== "object") return "mcq";
@@ -448,7 +445,6 @@
     if (scratchpadClear) {
       scratchpadClear.addEventListener("click", function () {
         if (ctx && canvasReady) {
-          const rect = scratchpadCanvas.getBoundingClientRect();
           ctx.save();
           ctx.setTransform(1, 0, 0, 1, 0, 0);
           ctx.clearRect(0, 0, scratchpadCanvas.width, scratchpadCanvas.height);
@@ -468,7 +464,7 @@
 
   const params = new URLSearchParams(window.location.search);
   const testId = params.get("test") || "";
-  
+
   /* ---------- Heartbeat (live presence) ---------- */
 
   let heartbeatSessionId = "";
@@ -608,7 +604,6 @@
       // Fetch profile — skip name screen if name available
       const profile = await fetchUserProfile();
       if (!profile || !profile.name || !profile.name.trim()) {
-        // Profile missing name — show name screen as fallback
         showScreen("name");
         setTimeout(function () { if (userNameInput) userNameInput.focus(); }, 60);
         return;
@@ -616,7 +611,7 @@
 
       // Auto-fill and begin
       state.userName = profile.name.trim().slice(0, 60);
-      state.userWhatsApp = ""; // not collected automatically
+      state.userWhatsApp = "";
       state.userEmail = profile.email || "";
       state.userId = profile.uid || "";
 
@@ -701,7 +696,8 @@
     announce(t("questionOf", { n: 1, total: state.publicTest.questions.length }));
     if (nextBtn) nextBtn.focus();
   }
-    /* ---------- Option LaTeX render ---------- */
+
+  /* ---------- Option LaTeX render ---------- */
 
   function renderOptionText(el, raw) {
     const str = String(raw || "");
@@ -723,7 +719,6 @@
       i = close + 1;
     }
   }
-
 
   /* ---------- Question rendering ---------- */
 
@@ -1057,9 +1052,6 @@
         if (Number.isInteger(idx) && idx >= 0 && idx <= 3) payloadAnswers[String(i)] = idx;
       }
     });
-    console.log("[PK DEBUG] state.answers count:", Object.keys(state.answers).length);
-    console.log("[PK DEBUG] payloadAnswers count:", Object.keys(payloadAnswers).length);
-    console.log("[PK DEBUG] sample:", JSON.stringify(state.answers).slice(0, 200));
 
     let scored = null;
     try {
@@ -1273,7 +1265,7 @@
     }
   });
 
-  /* ---------- Result PNG (unchanged) ---------- */
+  /* ---------- Result PNG ---------- */
 
   function roundRect(ctx, x, y, w, h, r) {
     ctx.beginPath();
