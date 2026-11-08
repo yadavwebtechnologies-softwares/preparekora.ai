@@ -196,6 +196,7 @@
       const data = await res.json();
       const quizzes = Array.isArray(data.quizzes) ? data.quizzes : [];
       const date = data.date || "";
+      const slot = data.slot || "";
 
       if (quizzes.length === 0) {
         wrap.innerHTML = '<div class="empty-state" style="padding: 40px 20px;">No quizzes available today. Check back soon.</div>';
@@ -219,14 +220,14 @@
             '</div>';
           card.style.cursor = "pointer";
           card.addEventListener("click", function () {
-            window.location.href = "result.html?date=" + encodeURIComponent(date) + "&subject=" + encodeURIComponent(q.subjectId);
+            window.location.href = "result.html?date=" + encodeURIComponent(date) + "&subject=" + encodeURIComponent(q.subjectId) + "&slot=" + encodeURIComponent(slot);
           });
         } else {
           card.innerHTML =
             '<p style="margin: 0 0 10px; font-size: 15px; font-weight: 600; color: var(--text);">' + esc(q.subjectName) + '</p>' +
             '<div style="padding: 10px 12px; border: 1px solid var(--accent); border-radius: 10px; background: var(--accent); color: #fff; text-align: center; cursor: pointer; font-size: 13px; font-weight: 600;">Start Quiz</div>';
           card.querySelector("div").addEventListener("click", function () {
-            window.location.href = "quiz.html?date=" + encodeURIComponent(date) + "&subject=" + encodeURIComponent(q.subjectId);
+            window.location.href = "quiz.html?date=" + encodeURIComponent(date) + "&subject=" + encodeURIComponent(q.subjectId) + "&slot=" + encodeURIComponent(slot);
           });
         }
 
@@ -286,12 +287,11 @@
         const card = document.createElement("div");
         card.className = "admin-test-card";
         card.style.cursor = "pointer";
-
         let title, subtitle, href;
         if (a._type === "quiz") {
           title = a.subjectName || "Quiz";
-          subtitle = "Daily Quiz · " + a.date;
-          href = "result.html?date=" + encodeURIComponent(a.date) + "&subject=" + encodeURIComponent(a.subjectId);
+          subtitle = "Daily Quiz · " + a.date + (a.slot ? (" (" + a.slot + ")") : "");
+          href = "result.html?date=" + encodeURIComponent(a.date) + "&subject=" + encodeURIComponent(a.subjectId) + (a.slot ? ("&slot=" + encodeURIComponent(a.slot)) : "");
         } else {
           title = a.testTitle || "Mock Test";
           subtitle = "Mock Test";
