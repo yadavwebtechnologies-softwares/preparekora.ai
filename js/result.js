@@ -41,27 +41,31 @@
   }
 
   /* ---------- Result data ---------- */
-
   const params = new URLSearchParams(window.location.search);
   const date = params.get("date") || "";
   const subjectId = params.get("subject") || "";
+  const slot = params.get("slot") || "";
 
   let resultData = null;
 
   function loadFromSession() {
     try {
-      const raw = sessionStorage.getItem("pk_quiz_result_" + date + "_" + subjectId);
-      if (!raw) return null;
-      return JSON.parse(raw);
-    } catch (e) { return null; }
+      if (slot) {
+        const raw = sessionStorage.getItem("pk_quiz_result_" + date + "_" + subjectId + "_" + slot);
+        if (raw) return JSON.parse(raw);
+      }
+      const raw = sessionStorage.getItem("pk_quiz_result_" + date + "_" + subjectId + "_");
+      if (raw) return JSON.parse(raw);
+    } catch (e) {}
+    return null;
   }
-
   async function loadFromWorker() {
     const token = getToken();
     if (!token) { redirectToLogin(); return null; }
 
     try {
-      const res = await fetch(API_BASE + "/daily-quizzes/" + encodeURIComponent(date) + "/" + encodeURIComponent(subjectId) + "/result", {
+      const slotQuery = slot ? ("?slot=" + encodeURIComponent(slot)) : "";
+      const res = await fetch(API_BASE + "/daily-quizzes/" + encodeURIComponent(date) + "/" + encodeURIComponent(subjectId) + "/result" + slotQuery, {
         method: "GET",
         headers: { "Authorization": "Bearer " + token }
       });
