@@ -126,7 +126,7 @@
     return null;
   }
 
-    function isAnswerCorrect(question, index) {
+  function isAnswerCorrect(question, index) {
     const state = window.MockTestState;
     if (!state) return false;
     const chosen = answerFor(index);
@@ -214,7 +214,6 @@
     }
     return { en: en, as: as };
   }
-
 
   function renderLatex(el, tex) {
     if (!el || !tex) return;
@@ -342,6 +341,9 @@
     wrap.appendChild(correctBox);
     return wrap;
   }
+
+  /* ---------- Explanation formatting ---------- */
+
   function formatExplanationLine(line) {
     const decoded = String(line)
       .replace(/&amp;/g, "&")
