@@ -208,9 +208,11 @@
   if (loginForm) {
     loginForm.addEventListener("submit", async function (e) {
       e.preventDefault();
-
-      const user = $id("loginUser").value.trim();
-      const pass = $id("loginPass").value;
+      const userEl = $id("loginUser");
+      const passEl = $id("loginPass");
+      const user = (userEl ? userEl.value : "").trim();
+      const pass = (passEl ? passEl.value : "");
+      console.log("LOGIN DEBUG:", { user, passLen: pass.length });
       const errEl = $id("loginError");
       const btn = $id("loginSubmit");
 
