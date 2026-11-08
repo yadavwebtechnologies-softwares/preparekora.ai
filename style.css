@@ -1,5 +1,5 @@
 /* =========================================================
-   PrepareKora.in — Shared Stylesheet v3 (Claymorphism + Waterdrop)
+   PrepareKora.in — Shared Stylesheet v4 (Claymorphism + Waterdrop)
    ========================================================= */
 
 :root {
@@ -16,6 +16,7 @@
   /* Accent (soft blue clay) */
   --accent: #4a6fa5;
   --accent-hover: #3d5a86;
+  --accent-soft: #eef3fa;
 
   /* Radius */
   --radius: 18px;
@@ -1088,7 +1089,7 @@ img { max-width: 100%; height: auto; }
 
 .option.is-selected {
   border-color: var(--accent);
-  background: var(--accent-soft, #eef3fa);
+  background: var(--accent-soft);
   box-shadow:
     0 4px 12px rgba(74, 111, 165, 0.25),
     inset 0 1px 0 rgba(255, 255, 255, 0.95);
@@ -1965,7 +1966,7 @@ img { max-width: 100%; height: auto; }
 
 .editor-option.is-answer {
   border-color: var(--accent);
-  background: var(--accent-soft, #eef3fa);
+  background: var(--accent-soft);
   box-shadow:
     0 4px 12px rgba(74, 111, 165, 0.2),
     inset 0 1px 0 rgba(255, 255, 255, 0.9);
@@ -2782,6 +2783,8 @@ img { max-width: 100%; height: auto; }
 
   #menuToggle { display: grid; }
 
+  #authActionBtn { display: none !important; }
+
   .menu-panel {
     top: calc(100% + 6px);
     right: 15px;
@@ -2848,71 +2851,7 @@ img { max-width: 100%; height: auto; }
   .interrupt-modal .modal-actions .btn { min-width: 120px; width: 100%; }
 
   .admin-header h1 { font-size: 20px; }
-}
 
-/* =========================================================
-   === PAGINATION ===
-   ========================================================= */
-
-.pagination {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  margin-top: 20px;
-  padding-top: 20px;
-  border-top: 1px solid var(--border);
-}
-
-.pagination .btn {
-  min-width: 100px;
-}
-
-.pagination-info {
-  color: var(--muted);
-  font-size: 12px;
-  font-weight: 500;
-  white-space: nowrap;
-  min-width: 90px;
-  text-align: center;
-}
-
-/* =========================================================
-   === ADMIN TEST TOOLBAR ===
-   ========================================================= */
-
-.admin-test-toolbar {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 16px;
-}
-
-.admin-test-toolbar .search-input-wrap {
-  flex: 1;
-  max-width: 320px;
-  height: 40px;
-}
-
-.admin-test-toolbar .search-input-wrap input {
-  width: 100%;
-  height: 38px;
-  border: 0;
-  outline: none;
-  background: transparent;
-  color: var(--text);
-  font-size: 13px;
-}
-
-.admin-test-toolbar .search-input-wrap input::placeholder {
-  color: #a3a3a3;
-}
-
-.admin-test-toolbar .btn {
-  flex-shrink: 0;
-}
-
-@media (max-width: 560px) {
   .pagination {
     flex-wrap: wrap;
     gap: 8px;
@@ -2948,9 +2887,71 @@ img { max-width: 100%; height: auto; }
   }
 }
 
-/* =========================================================
-   === CONTROL ROOM (v1 tree-based, backward compat) ===
-   ========================================================= */
+/* ============================
+   Pagination
+   ============================ */
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+
+.pagination .btn {
+  min-width: 100px;
+}
+
+.pagination-info {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  min-width: 90px;
+  text-align: center;
+}
+
+/* ============================
+   Admin Test Toolbar
+   ============================ */
+
+.admin-test-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.admin-test-toolbar .search-input-wrap {
+  flex: 1;
+  max-width: 320px;
+  height: 40px;
+}
+
+.admin-test-toolbar .search-input-wrap input {
+  width: 100%;
+  height: 38px;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: var(--text);
+  font-size: 13px;
+}
+
+.admin-test-toolbar .search-input-wrap input::placeholder {
+  color: #a3a3a3;
+}
+
+.admin-test-toolbar .btn {
+  flex-shrink: 0;
+}
+
+/* ============================
+   Control Room (v1 tree-based)
+   ============================ */
 
 .db-layout {
   display: grid;
@@ -3134,10 +3135,9 @@ img { max-width: 100%; height: auto; }
   color: var(--text);
 }
 
-/* =========================================================
-   === CONTROL ROOM v2 (section-based) ===
-   NOTE: This block is OUTSIDE the 760px media query (bug fixed)
-   ========================================================= */
+/* ============================
+   Control Room v2 (section-based)
+   ============================ */
 
 .db-toolbar {
   display: flex;
@@ -3433,9 +3433,9 @@ img { max-width: 100%; height: auto; }
   border-top: 1px solid var(--border);
 }
 
-/* =========================================================
-   === RESPONSIVE for Control Room ===
-   ========================================================= */
+/* ============================
+   Responsive — Control Room
+   ============================ */
 
 @media (max-width: 760px) {
   .db-layout {
@@ -3458,11 +3458,11 @@ img { max-width: 100%; height: auto; }
   .db-item-actions .btn { flex: 1; }
   .db-modal-wide { max-width: 100%; }
 }
-/* =========================================================
-   === WATERDROP RIPPLE (click/tap feedback) ===
-   ========================================================= */
 
-/* Ripple keyframe — expanding + fading circle */
+/* ============================
+   Waterdrop Ripple (click/tap feedback)
+   ============================ */
+
 @keyframes pk-ripple {
   0% {
     transform: scale(0);
@@ -3477,7 +3477,6 @@ img { max-width: 100%; height: auto; }
   }
 }
 
-/* Container: overflow hidden + relative (ripple ko andar rakhne ke liye) */
 .btn,
 .start-button,
 .icon-button,
@@ -3492,10 +3491,9 @@ img { max-width: 100%; height: auto; }
 .card {
   position: relative;
   overflow: hidden;
-  isolation: isolate; /* stacking context so ripple stays inside */
+  isolation: isolate;
 }
 
-/* Ripple circle — pseudo-element, center se expand hota hai */
 .btn::after,
 .start-button::after,
 .icon-button::after,
@@ -3514,7 +3512,7 @@ img { max-width: 100%; height: auto; }
   left: 50%;
   width: 20px;
   height: 20px;
-  margin: -10px 0 0 -10px; /* center align */
+  margin: -10px 0 0 -10px;
   border-radius: 50%;
   background: radial-gradient(circle,
     rgba(74, 111, 165, 0.45) 0%,
@@ -3527,7 +3525,6 @@ img { max-width: 100%; height: auto; }
   z-index: -1;
 }
 
-/* Active (press/tap) — ripple trigger */
 .btn:active::after,
 .start-button:active::after,
 .icon-button:active::after,
@@ -3543,9 +3540,7 @@ img { max-width: 100%; height: auto; }
   animation: pk-ripple 0.55s ease-out;
 }
 
-/* Primary buttons — ripple in white for contrast on blue bg */
-.btn-primary::after,
-.btn-primary:active::after {
+.btn-primary::after {
   background: radial-gradient(circle,
     rgba(255, 255, 255, 0.55) 0%,
     rgba(255, 255, 255, 0.25) 60%,
@@ -3553,7 +3548,6 @@ img { max-width: 100%; height: auto; }
   );
 }
 
-/* Selected/answered states — accent ripple visible */
 .option.is-selected::after {
   background: radial-gradient(circle,
     rgba(255, 255, 255, 0.4) 0%,
@@ -3568,9 +3562,4 @@ img { max-width: 100%; height: auto; }
     rgba(255, 255, 255, 0.2) 60%,
     transparent 100%
   );
-}
-@media (max-width: 560px) {
-  #authActionBtn {
-    display: none !important;
-  }
 }
