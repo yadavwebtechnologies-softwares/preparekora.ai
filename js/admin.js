@@ -570,15 +570,18 @@
     const card = document.createElement("div");
     card.className = "admin-test-card";
     const isPublished = test.status === "published";
+    const perQuiz = Number(subject.dailyQuestionCount) || 0;
+
     card.innerHTML =
       '<div class="admin-test-info">' +
-        '<p class="admin-test-title">' + esc(test.title) + "</p>" +
+        '<p class="admin-test-title">' + esc(subject.name) + '</p>' +
         '<div class="admin-test-meta">' +
-          '<span class="status-badge ' + (isPublished ? "published" : "draft") + '">' + esc(isPublished ? t("published") : t("draft")) + "</span>" +
-          "<span>" + Number(test.questionCount || 0) + " " + esc(t("questionsUnit")) + "</span>" +
-          "<span>" + Number(test.minutes || 0) + " " + esc(t("minutesUnit")) + "</span>" +
-        "</div>" +
-      "</div>" +
+          '<span class="status-badge ' + (isActive ? "published" : "draft") + '">' + (isActive ? "Active" : "Inactive") + '</span>' +
+          '<span>' + qCount + ' questions</span>' +
+          '<span>' + (perQuiz > 0 ? (perQuiz + '/quiz') : 'default/quiz') + '</span>' +
+          (subject.category ? '<span>' + esc(subject.category) + '</span>' : '') +
+        '</div>' +
+      '</div>' +
       '<div class="admin-test-actions"></div>';
     const actions = card.querySelector(".admin-test-actions");
     const subsBtn = document.createElement("button");
@@ -717,6 +720,11 @@
           '<input type="text" class="form-input" id="subjectCategoryInput" maxlength="40" value="' + esc(subject ? (subject.category || "") : "") + '" placeholder="e.g. GK, Math, Reasoning">' +
         '</div>' +
         '<div class="form-field">' +
+          '<label class="form-label">Daily questions (5–30)</label>' +
+          '<input type="number" class="form-input" id="subjectDailyCountInput" min="0" max="30" step="1" value="' + (subject ? (subject.dailyQuestionCount || 0) : 0) + '">' +
+          '<p class="form-hint">Questions per quiz for this subject. Leave 0 to use the global default. Must be 0 or 5–30.</p>' +
+        '</div>' +
+        '<div class="form-field">' +
           '<label class="form-label">Order (optional)</label>' +
           '<input type="number" class="form-input" id="subjectOrderInput" min="0" value="' + (subject ? (subject.order || 0) : 0) + '">' +
           '<p class="form-hint">Lower number appears first.</p>' +
@@ -730,6 +738,7 @@
     document.body.appendChild(overlay);
     const nameInput = overlay.querySelector("#subjectNameInput");
     const catInput = overlay.querySelector("#subjectCategoryInput");
+    const dailyCountInput = overlay.querySelector("#subjectDailyCountInput");
     const orderInput = overlay.querySelector("#subjectOrderInput");
     const errEl = overlay.querySelector("#subjectEditorError");
     const saveBtn = overlay.querySelector("#subjectEditorSave");
@@ -745,9 +754,22 @@
       const name = nameInput.value.trim();
       if (!name || name.length < 2) { errEl.textContent = "Name must be at least 2 characters"; errEl.hidden = false; return; }
       if (name.length > 60) { errEl.textContent = "Name too long"; errEl.hidden = false; return; }
+
+      const dqVal = Number(dailyCountInput.value) || 0;
+      if (dqVal !== 0 && (dqVal < 5 || dqVal > 30)) {
+        errEl.textContent = "Daily questions must be 0 (use default) or 5–30";
+        errEl.hidden = false;
+        return;
+      }
+
       saveBtn.disabled = true;
       try {
-        const payload = { name: name, category: catInput.value.trim(), order: Number(orderInput.value) || 0 };
+        const payload = {
+          name: name,
+          category: catInput.value.trim(),
+          order: Number(orderInput.value) || 0,
+          dailyQuestionCount: dqVal
+        };
         if (isEdit) { await api.updateSubject(subject.id, payload); toast("Subject updated", "success"); }
         else { await api.createSubject(payload); toast("Subject created", "success"); }
         close();
