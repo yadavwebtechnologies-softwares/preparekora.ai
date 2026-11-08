@@ -101,7 +101,6 @@
       <nav class="desktop-nav" aria-label="Desktop navigation">
         <a href="about.html" data-i18n="navAbout">About</a>
         <a href="find-us.html" data-i18n="navFindUs">Find Us</a>
-        <a href="admin.html">Administrator</a>
       </nav>
 
       <div class="nav-actions">
@@ -131,7 +130,6 @@
       <nav class="menu-panel" id="menuPanel" aria-label="Mobile navigation">
         <a href="about.html" data-i18n="navAbout">About</a>
         <a href="find-us.html" data-i18n="navFindUs">Find Us</a>
-        <a href="admin.html">Administrator</a>
 
         <div class="lang-switch" role="group" aria-label="Language">
           <button class="lang-btn is-active" type="button" data-lang="en" aria-pressed="true">EN</button>
@@ -476,7 +474,6 @@
       <nav class="footer-links" aria-label="Footer navigation">
         <a href="about.html" data-i18n="navAbout">About</a>
         <a href="find-us.html" data-i18n="navFindUs">Find Us</a>
-        <a href="terms.html" data-i18n="navTerms">Terms &amp; Privacy</a>
       </nav>
     </div>
   </footer>
@@ -516,7 +513,7 @@
     </div>
   </div>
 
-  <!-- INTERRUPTION MODAL -->
+    <!-- INTERRUPTION MODAL -->
   <div
     class="modal-overlay"
     id="interruptOverlay"
@@ -582,7 +579,7 @@
   <div class="sr-only" id="srStatus" role="status" aria-live="polite"></div>
 
   <script src="js/config.js"></script>
-  <script>
+    <script>
   (function () {
     const TOKEN_KEY = "pk_user_id_token";
     const EXPIRES_KEY = "pk_user_expires_at";
@@ -602,6 +599,7 @@
     }
 
     if (!isLoggedIn()) {
+      // Save current URL to return after login
       try {
         sessionStorage.setItem("pk_post_login_redirect", window.location.href);
       } catch (e) {}
