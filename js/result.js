@@ -27,6 +27,15 @@
     });
   }
 
+  function formatTime(sec) {
+    const s = Number(sec) || 0;
+    if (s <= 0) return "—";
+    const m = Math.floor(s / 60);
+    const r = s % 60;
+    if (m === 0) return r + "s";
+    return m + "m " + String(r).padStart(2, "0") + "s";
+  }
+
   function showScreen(name) {
     ["resultLoading", "resultError", "resultContent"].forEach(function (k) {
       const el = $id(k);
@@ -41,6 +50,7 @@
   }
 
   /* ---------- Result data ---------- */
+
   const params = new URLSearchParams(window.location.search);
   const date = params.get("date") || "";
   const subjectId = params.get("subject") || "";
@@ -59,6 +69,7 @@
     } catch (e) {}
     return null;
   }
+
   async function loadFromWorker() {
     const token = getToken();
     if (!token) { redirectToLogin(); return null; }
@@ -83,10 +94,8 @@
       return;
     }
 
-    // Try sessionStorage first (from quiz submit — fast)
     resultData = loadFromSession();
 
-    // If not in session, try Worker (refresh-safe)
     if (!resultData) {
       resultData = await loadFromWorker();
     }
@@ -130,15 +139,7 @@
     renderQuestions();
   }
 
-  function formatTime(sec) {
-    const s = Number(sec) || 0;
-    if (s <= 0) return "—";
-    const m = Math.floor(s / 60);
-    const r = s % 60;
-    if (m === 0) return r + "s";
-    return m + "m " + String(r).padStart(2, "0") + "s";
-  }
-    /* ---------- AI Explanation ---------- */
+  /* ---------- AI Explanation ---------- */
 
   function getExplainCacheKey(question) {
     const qText = (question.q || "").slice(0, 80).replace(/\s+/g, " ").trim();
@@ -284,6 +285,7 @@
     return wrap;
   }
 
+  /* ---------- Question review ---------- */
 
   function renderQuestions() {
     const wrap = $id("resultQuestions");
@@ -336,22 +338,6 @@
       }
 
       wrap.appendChild(card);
-    });
-  }
-
-  function formatTime(sec) {
-    const s = Number(sec) || 0;
-    if (s <= 0) return "—";
-    const m = Math.floor(s / 60);
-    const r = s % 60;
-    if (m === 0) return r + "s";
-    return m + "m " + String(r).padStart(2, "0") + "s";
-  }
-
-  function esc(v) {
-    return String(v).replace(/[&<>"']/g, function (c) {
-      const m = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" };
-      return m[c];
     });
   }
 
