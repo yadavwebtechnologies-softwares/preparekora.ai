@@ -80,7 +80,7 @@
       return request("/login", {
         method: "POST",
         noAuth: true,
-        body: JSON.stringify({ username: u, password: p })
+        body: JSON.stringify({ email: u, password: p })
       });
     },
     me: function () { return request("/me"); },
@@ -232,7 +232,7 @@
         await enterDashboard();
       } catch (err) {
         errEl.textContent =
-          err.status === 401 ? t("invalidLogin") : (err.message || "Error");
+          err.status === 401 ? t("invalidLogin") : (err.message || "Login failed");
         errEl.hidden = false;
       } finally {
         btn.disabled = false;
