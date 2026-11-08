@@ -53,6 +53,7 @@
   }
 
   /* ---------- State ---------- */
+
   const params = new URLSearchParams(window.location.search);
   const date = params.get("date") || "";
   const subjectId = params.get("subject") || "";
