@@ -1,16 +1,17 @@
 // ═══════════════════════════════════════════════════════════
-// PrepareKora — Test Archive Loader
-// Loads subjects + tests, groups into Today / Yesterday / Earlier
-// Handles pagination for "Earlier" group
+// PrepareKora — Test Archive Loader (v2 — search integration)
 // ═══════════════════════════════════════════════════════════
 
 (function () {
   "use strict";
 
-  const EARLIER_PAGE_SIZE = 8; // 8 earlier tests per page
+  const EARLIER_PAGE_SIZE = 8;
 
-  let allTests = [];       // flat list of all tests with metadata
+  let allTests = [];
   let earlierPage = 1;
+
+  // Expose for search (main.js uses window._pkAllTests)
+  window._pkAllTests = [];
 
   // ─────────────────────────────────────────────────────────
   // HELPERS
@@ -63,9 +64,6 @@
 
   // ─────────────────────────────────────────────────────────
   // BUILD TEST LIST
-  // For each active subject:
-  //   - forever-free test (if hasForeverFree)
-  //   - paid tests (published)
   // ─────────────────────────────────────────────────────────
   async function buildTestList() {
     const tests = [];
@@ -80,7 +78,6 @@
     }
 
     for (const subj of subjects) {
-      // Forever free
       if (subj.hasForeverFree) {
         try {
           const ff = await apiGet(`/api/tests/subject/${encodeURIComponent(subj.id)}/forever-free`);
@@ -99,17 +96,14 @@
               dateISO: null
             });
           }
-        } catch (e) {
-          // forever-free not configured yet — skip
-        }
+        } catch (e) {}
       }
 
-      // Paid homepage tests
       try {
         const paid = await apiGet(`/api/public/homepage-tests/${encodeURIComponent(subj.id)}`);
         const paidTests = paid.tests || [];
         for (const t of paidTests) {
-          if (t.isPaid === false) continue; // skip free pinned ones
+          if (t.isPaid === false) continue;
           const publishedAt = t.publishedAt || 0;
           const dateISO = publishedAt
             ? new Date(publishedAt).toISOString().slice(0, 10)
@@ -128,12 +122,9 @@
             dateISO
           });
         }
-      } catch (e) {
-        // no paid tests — fine
-      }
+      } catch (e) {}
     }
 
-    // Sort by publishedAt desc (forever-free tests at bottom of their group)
     tests.sort((a, b) => (b.publishedAt || 0) - (a.publishedAt || 0));
     return tests;
   }
@@ -144,20 +135,13 @@
   function groupTests(tests) {
     const today = todayISO();
     const yesterday = yesterdayISO();
-
     const groups = { today: [], yesterday: [], earlier: [] };
 
     for (const t of tests) {
-      if (!t.dateISO) {
-        // forever-free tests have no date — put in today
-        groups.today.push(t);
-      } else if (t.dateISO === today) {
-        groups.today.push(t);
-      } else if (t.dateISO === yesterday) {
-        groups.yesterday.push(t);
-      } else {
-        groups.earlier.push(t);
-      }
+      if (!t.dateISO) groups.today.push(t);
+      else if (t.dateISO === today) groups.today.push(t);
+      else if (t.dateISO === yesterday) groups.yesterday.push(t);
+      else groups.earlier.push(t);
     }
 
     return groups;
@@ -177,7 +161,6 @@
       ? `<span class="badge badge-accent">Free</span>`
       : `<span class="badge badge-muted">Paid</span>`;
 
-    // Date badge
     let dateBadgeHtml = "";
     if (test.dateISO) {
       const d = new Date(test.dateISO + "T00:00:00");
@@ -281,7 +264,7 @@
   }
 
   // ─────────────────────────────────────────────────────────
-  // BIND PAGINATION BUTTONS
+  // BIND PAGINATION
   // ─────────────────────────────────────────────────────────
   function bindPagination(groups) {
     const prevBtn = $("earlierPrevBtn");
@@ -310,7 +293,7 @@
   }
 
   // ─────────────────────────────────────────────────────────
-  // HANDLE START BUTTON CLICK
+  // START BUTTON CLICK
   // ─────────────────────────────────────────────────────────
   async function onStartClick(btn) {
     const testType = btn.getAttribute("data-test-type");
@@ -318,7 +301,6 @@
     const subjectId = btn.getAttribute("data-subject-id");
     const isFree = btn.getAttribute("data-is-free") === "1";
 
-    // If paid and not logged in, redirect to login
     if (!isFree && !isLoggedIn()) {
       try {
         sessionStorage.setItem(
@@ -340,11 +322,7 @@
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          testType,
-          testId,
-          subjectId
-        })
+        body: JSON.stringify({ testType, testId, subjectId })
       });
 
       const data = await res.json().catch(() => ({}));
@@ -363,19 +341,19 @@
         throw new Error(data.error || data.message || `HTTP ${res.status}`);
       }
 
-      // Store attempt and go to mock-test page
       try {
         sessionStorage.setItem("pk_active_attempt", JSON.stringify(data));
       } catch (e) {}
       window.location.href = "mock-test.html";
     } catch (err) {
-      showToast(err.message || "Could not start test.", "error");
+      if (typeof window.pkToast === "function") {
+        window.pkToast(err.message || "Could not start test.", "error");
+      }
       btn.disabled = false;
       btn.textContent = originalText;
     }
   }
 
-  // Delegate click on any .start-button
   function bindStartButtons() {
     document.addEventListener("click", (e) => {
       const btn = e.target.closest(".start-button");
@@ -414,7 +392,6 @@
     setTimeout(() => toast.remove(), 3500);
   }
 
-  // Expose for other scripts
   window.pkToast = showToast;
   window.pkIsLoggedIn = isLoggedIn;
 
@@ -431,6 +408,9 @@
 
     try {
       allTests = await buildTestList();
+
+      // Expose for search (main.js)
+      window._pkAllTests = allTests;
 
       if (allTests.length === 0) {
         if (emptyEl) emptyEl.hidden = false;
