@@ -1,0 +1,45 @@
+name = "preparekora-worker"
+main = "src/index.js"
+compatibility_date = "2024-11-01"
+compatibility_flags = ["nodejs_compat"]
+
+# ─────────────────────────────────────────────────────────────
+# CRON TRIGGERS (IST based)
+# ─────────────────────────────────────────────────────────────
+# 6:00 AM IST = 00:30 UTC
+# 6:00 PM IST = 12:30 UTC
+# Cloudflare Cron uses UTC. These fire daily.
+# ─────────────────────────────────────────────────────────────
+[triggers]
+crons = [
+  "30 0 * * *",   # 6:00 AM IST — Morning daily tests
+  "30 12 * * *",  # 6:00 PM IST — Evening daily tests
+  "0 18 * * *"    # 11:30 PM IST — Daily backup & expiry check
+]
+
+# ─────────────────────────────────────────────────────────────
+# ENVIRONMENT VARIABLES (non-secret)
+# Secrets are set via Cloudflare Dashboard (already done)
+# ─────────────────────────────────────────────────────────────
+[vars]
+ENVIRONMENT = "production"
+ALLOWED_ORIGINS = "https://yadavwebtechnologies-softwares.github.io"
+FIREBASE_AUTH_DOMAIN = "preparek.firebaseapp.com"
+
+# ─────────────────────────────────────────────────────────────
+# OBSERVABILITY
+# ─────────────────────────────────────────────────────────────
+[observability]
+enabled = true
+
+[observability.logs]
+invocation_logs = true
+
+# ─────────────────────────────────────────────────────────────
+# NOTE: Secrets (already configured in Dashboard):
+#   - FIREBASE_PROJECT_ID
+#   - FIREBASE_DATABASE_URL
+#   - FIREBASE_SERVICE_ACCOUNT_JSON
+#   - ADMIN_UID_ALLOWLIST
+# These are NOT here. They live in Cloudflare Secrets.
+# ─────────────────────────────────────────────────────────────
