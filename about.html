@@ -3,141 +3,114 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#ffffff">
-  <meta name="description" content="About PrepareKora.in — Mentors, teachers and the team behind the platform.">
-  <title>About — PrepareKora.in</title>
+  <meta name="theme-color" content="#eef1f6">
+  <title>About — PrepareKora</title>
+  <meta name="description" content="Learn about PrepareKora — an online examination platform built for ADRE, Assam Police, and other competitive exam preparation.">
+  <link rel="canonical" href="https://yadavwebtechnologies-softwares.github.io/preparekora/about.html">
+  <link rel="icon" type="image/svg+xml" href="assets/icons/favicon.svg">
   <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
 
   <header class="header">
     <div class="header-inner">
-
       <a class="brand" href="index.html" aria-label="PrepareKora home">
         <span class="brand-main">preparekora</span><span class="brand-in">.in</span>
       </a>
-
       <nav class="desktop-nav" aria-label="Desktop navigation">
-        <a href="about.html" data-i18n="navAbout">About</a>
+        <a href="about.html" class="active" data-i18n="navAbout">About</a>
         <a href="find-us.html" data-i18n="navFindUs">Find Us</a>
-        <a href="admin.html" data-i18n="navAdmin">Admin</a>
+        <a href="admin.html" data-i18n="navAdmin">Administrator</a>
       </nav>
-
       <div class="nav-actions">
-
+        <a class="btn btn-sm" id="authActionBtn" href="login.html" style="display:none;">Sign in</a>
         <div class="lang-switch" role="group" aria-label="Language">
           <button class="lang-btn is-active" type="button" data-lang="en" aria-pressed="true">EN</button>
           <button class="lang-btn" type="button" data-lang="as" aria-pressed="false">অসমীয়া</button>
         </div>
-
-        <button
-          class="icon-button"
-          id="menuToggle"
-          type="button"
-          aria-label="Open navigation menu"
-          aria-expanded="false"
-          aria-controls="menuPanel"
-        >
-          <svg id="menuIcon" viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M4 7h16"></path>
-            <path d="M4 12h16"></path>
-            <path d="M4 17h16"></path>
+        <button class="icon-button" id="menuToggle" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="menuPanel">
+          <svg class="pk-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M4 7h16"></path><path d="M4 12h16"></path><path d="M4 17h16"></path>
           </svg>
         </button>
-
       </div>
-
       <nav class="menu-panel" id="menuPanel" aria-label="Mobile navigation">
-        <a href="about.html" data-i18n="navAbout">About</a>
-        <a href="find-us.html" data-i18n="navFindUs">Find Us</a>
-        <a href="admin.html" data-i18n="navAdmin">Admin</a>
-
+        <a href="about.html">About</a>
+        <a href="find-us.html">Find Us</a>
+        <a href="admin.html">Administrator</a>
+        <a href="login.html" id="authActionBtnMobile">Sign in</a>
         <div class="lang-switch" role="group" aria-label="Language">
           <button class="lang-btn is-active" type="button" data-lang="en" aria-pressed="true">EN</button>
           <button class="lang-btn" type="button" data-lang="as" aria-pressed="false">অসমীয়া</button>
         </div>
       </nav>
-
     </div>
   </header>
 
   <main class="page-container">
-
     <section class="page-heading">
-      <h1 data-i18n="aboutTitle">About</h1>
-      <p data-i18n="aboutSubtitle">PrepareKora.in — free mock tests for competitive exam preparation.</p>
+      <h1 data-i18n="navAbout">About</h1>
+      <p data-i18n="aboutSub">Learn about PrepareKora and why we built it.</p>
     </section>
 
-    <article class="card" style="max-width: 720px;">
-
-      <p class="muted-text" style="margin-bottom: 16px;" data-i18n="aboutIntro1">
-        PrepareKora.in is a simple, free platform where students can practice mock tests for competitive exams. Every test is created by an experienced teacher and published directly by them.
+    <div class="legal-body">
+      <p>
+        <strong>PrepareKora</strong> is an online examination platform built specifically for students preparing for the
+        <strong>Assam Direct Recruitment Examination (ADRE)</strong>, <strong>Assam Police</strong> examinations, and other
+        competitive exams. Our goal is simple: make quality practice material affordable and accessible to every aspirant
+        in Assam.
       </p>
 
-      <p class="muted-text" style="margin-bottom: 16px;" data-i18n="aboutIntro2">
-        Each test includes a timer, question navigation, mark-for-review and a downloadable result card so you can track your progress over time.
+      <h2>What we offer</h2>
+      <ul>
+        <li>Subject-wise mock tests for ADRE, Assam Police, and general competitive exams.</li>
+        <li>A <strong>Forever Free</strong> mock test for every subject — no login required.</li>
+        <li>Daily automated mock tests at 6:00 AM and 6:00 PM IST.</li>
+        <li>Detailed result reviews with question-wise explanations in English and Assamese.</li>
+        <li>Performance tracking to help you focus on weaker areas.</li>
+      </ul>
+
+      <h2>Why we built PrepareKora</h2>
+      <p>
+        Many students in Assam struggle to find reliable, affordable practice material. Most platforms are either priced
+        out of reach for daily practice, or they don't support regional languages. PrepareKora was built to solve both
+        problems — practice should be cheap, tests should be frequent, and explanations should be available in the language
+        you think in.
       </p>
 
-      <p class="muted-text" style="margin-bottom: 24px;" data-i18n="aboutIntro3">
-        The site is available in English and Assamese. Content created in English is translated automatically, so Assamese-medium students can prepare in their own language.
+      <h2>Our approach</h2>
+      <p>
+        Every question is curated from standard competitive exam patterns. Every explanation is reviewed before it's used in a
+        published test. We don't try to be everything to everyone — we focus on what actually helps you score higher on the
+        exam day.
       </p>
 
-      <h2 data-i18n="aboutMentors" style="margin: 0 0 12px; font-size: 15px; font-weight: 600; letter-spacing: -0.2px;">
-        Mentors and Teachers
-      </h2>
-
-      <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px;">
-
-        <div style="padding: 14px 16px; border: 1px solid var(--border); border-radius: var(--radius); background: #ffffff;">
-          <p style="margin: 0 0 2px; font-size: 14px; font-weight: 600;">Sir Yadav Subba</p>
-          <p class="muted-text" style="margin: 0;" data-i18n="aboutRoleMentor">Mentor &amp; Teacher</p>
-        </div>
-
-        <div style="padding: 14px 16px; border: 1px solid var(--border); border-radius: var(--radius); background: #ffffff;">
-          <p style="margin: 0 0 2px; font-size: 14px; font-weight: 600;">Sir Rohit Biswas</p>
-          <p class="muted-text" style="margin: 0;" data-i18n="aboutRoleMentor">Mentor &amp; Teacher</p>
-        </div>
-
-      </div>
-
-      <h2 data-i18n="aboutDevelopedBy" style="margin: 0 0 12px; font-size: 15px; font-weight: 600; letter-spacing: -0.2px;">
-        Developed by
-      </h2>
-
-      <div style="padding: 16px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); margin-bottom: 24px;">
-        <p style="margin: 0 0 4px; font-size: 14px; font-weight: 600;">
-          Yadav Web Technologies
-        </p>
-        <p class="muted-text" style="margin: 0;" data-i18n="aboutDevDesc">
-          Website designed and developed by Yadav Web Technologies, founded by Sir Yadav Subba.
-        </p>
-      </div>
-
-      <div data-i18n-html="aboutFooter" class="muted-text"></div>
-
-    </article>
-
+      <h2>Contact</h2>
+      <p>
+        Have a question or feedback? Visit our <a href="find-us.html">Find Us</a> page to reach out.
+      </p>
+    </div>
   </main>
 
   <footer class="footer">
     <div class="footer-inner">
       <a href="index.html" class="footer-brand">PrepareKora.in</a>
-
-      <div class="footer-copy">
-        © <span id="currentYear"></span> PrepareKora.in
-      </div>
-
+      <div class="footer-copy">© <span id="currentYear"></span> PrepareKora.in</div>
       <nav class="footer-links" aria-label="Footer navigation">
-        <a href="about.html" data-i18n="navAbout">About</a>
-        <a href="find-us.html" data-i18n="navFindUs">Find Us</a>
-        <a href="terms.html" data-i18n="navTerms">Terms &amp; Privacy</a>
+        <a href="about.html">About</a>
+        <a href="find-us.html">Find Us</a>
+        <a href="terms.html">Terms &amp; Privacy</a>
       </nav>
     </div>
   </footer>
 
+  <script>
+    window.PK_CONFIG = {
+      API_BASE: "https://preparekora-worker.yadavsubba2003.workers.dev",
+      SITE_BASE: "https://yadavwebtechnologies-softwares.github.io/preparekora"
+    };
+  </script>
   <script src="js/translation.js"></script>
   <script src="js/main.js"></script>
-
 </body>
 </html>
