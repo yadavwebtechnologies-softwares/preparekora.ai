@@ -1,439 +1,261 @@
-"use strict";
-
-/*
-  PrepareKora — Homepage logic (self-contained).
-  Loads only translation.js. API client inlined here so
-  no extra scripts are required in index.html.
-
-  Earlier section is paginated (5 per page).
-  Today & Yesterday show all tests.
-*/
+// ═══════════════════════════════════════════════════════════
+// PrepareKora — Main Global Logic
+// Mobile menu, auth button, search overlay, footer year
+// ═══════════════════════════════════════════════════════════
 
 (function () {
+  "use strict";
 
-  /* ---------- API (inline) ---------- */
+  // ─────────────────────────────────────────────────────────
+  // HELPERS
+  // ─────────────────────────────────────────────────────────
+  function $(id) { return document.getElementById(id); }
+  function $sel(sel) { return document.querySelector(sel); }
+  function $all(sel) { return document.querySelectorAll(sel); }
 
-  const API_BASE = (function () {
-    const host = window.location.hostname;
-    const isLocal =
-      host === "localhost" ||
-      host === "127.0.0.1" ||
-      host === "0.0.0.0" ||
-      host === "" ||
-      host.endsWith(".local");
-    return isLocal ? "http://localhost:8787/api" : "https://preparekora-api.yadavsubba2003.workers.dev/api";
-  })();
-
-  async function apiFetch(path) {
-    const res = await fetch(API_BASE + path, {
-      method: "GET",
-      headers: { "Accept": "application/json" }
-    });
-    if (!res.ok) {
-      const err = new Error("HTTP " + res.status);
-      err.status = res.status;
-      throw err;
-    }
-    return res.json();
-  }
-
-  /* ---------- State ---------- */
-
-  const EARLIER_PAGE_SIZE = 5;
-
-  const state = {
-    tests: [],
-    loaded: false,
-    earlierPage: 0
-  };
-
-  /* ---------- DOM ---------- */
-
-  const todayList = document.getElementById("todayTests");
-  const yesterdayList = document.getElementById("yesterdayTests");
-  const earlierList = document.getElementById("earlierTests");
-  const emptyState = document.getElementById("archiveEmpty");
-
-  const earlierPagination = document.getElementById("earlierPagination");
-  const earlierPrevBtn = document.getElementById("earlierPrevBtn");
-  const earlierNextBtn = document.getElementById("earlierNextBtn");
-  const earlierPageInfo = document.getElementById("earlierPageInfo");
-
-  const menuToggle = document.getElementById("menuToggle");
-  const menuPanel = document.getElementById("menuPanel");
-  const menuIcon = document.getElementById("menuIcon");
-
-  const searchOpenBtn = document.getElementById("searchOpen");
-  const searchCloseBtn = document.getElementById("searchClose");
-  const searchOverlay = document.getElementById("searchOverlay");
-  const searchInput = document.getElementById("searchInput");
-  const searchResults = document.getElementById("searchResults");
-
-  /* ---------- Utilities ---------- */
-
-  function t(key, vars) {
-    return (window.PK && window.PK.t) ? window.PK.t(key, vars) : key;
-  }
-
-  function escapeHTML(value) {
-    return String(value).replace(/[&<>"']/g, function (ch) {
-      const map = {
-        "&": "&amp;", "<": "&lt;", ">": "&gt;",
-        '"': "&quot;", "'": "&#039;"
-      };
-      return map[ch];
-    });
-  }
-
-  function formatBadgeDate(ts) {
-    const d = new Date(ts);
-    if (isNaN(d.getTime())) return { day: "—", month: "—" };
-    const locale = (window.PK && window.PK.locale) ? window.PK.locale() : "en-IN";
-    return {
-      day: d.getDate(),
-      month: d.toLocaleDateString(locale, { month: "short" })
-    };
-  }
-
-  function groupFor(ts) {
-    const d = new Date(ts);
-    if (isNaN(d.getTime())) return "earlier";
-    const now = new Date();
-    const midnight = function (x) {
-      return new Date(x.getFullYear(), x.getMonth(), x.getDate()).getTime();
-    };
-    const diff = Math.round((midnight(now) - midnight(d)) / 86400000);
-    if (diff <= 0) return "today";
-    if (diff === 1) return "yesterday";
-    return "earlier";
-  }
-
-  /* ---------- Card builder ---------- */
-
-  function buildCard(test) {
-    const dateParts = formatBadgeDate(test.createdAt);
-    const card = document.createElement("article");
-    card.className = "test-card";
-
-    card.innerHTML = `
-      <div class="date-badge" aria-hidden="true">
-        <span class="date-day">${dateParts.day}</span>
-        <span class="date-month">${escapeHTML(dateParts.month)}</span>
-      </div>
-
-      <div class="test-info">
-        <h3 class="test-title">${escapeHTML(test.title)}</h3>
-        <p class="test-publisher">${escapeHTML(
-          t("byLine", { name: test.publisherName || "—" })
-        )}</p>
-        <div class="test-meta">
-          <span>${Number(test.questionCount) || 0} ${escapeHTML(t("questionsUnit"))}</span>
-          <span>${Number(test.minutes) || 0} ${escapeHTML(t("minutesUnit"))}</span>
-        </div>
-      </div>
-
-      <a class="start-button"
-         href="mock-test.html?test=${encodeURIComponent(test.id)}"
-         aria-label="${escapeHTML(t("start"))} ${escapeHTML(test.title)}">
-        ${escapeHTML(t("start"))}
-      </a>
-    `;
-
-    return card;
-  }
-
-  /* ---------- Render ---------- */
-
-  function render() {
-    if (!state.loaded) {
-      [todayList, yesterdayList, earlierList].forEach(function (el) {
-        if (el) {
-          el.innerHTML =
-            '<div class="loading-state"><div class="spinner"></div>' +
-            '<span>' + escapeHTML(t("loading")) + '</span></div>';
-        }
-      });
-      if (emptyState) emptyState.hidden = true;
-      if (earlierPagination) earlierPagination.hidden = true;
-      return;
-    }
-
-    const groups = { today: [], yesterday: [], earlier: [] };
-    state.tests.forEach(function (test) {
-      groups[groupFor(test.createdAt)].push(test);
-    });
-
-    Object.keys(groups).forEach(function (key) {
-      groups[key].sort(function (a, b) { return b.createdAt - a.createdAt; });
-    });
-
-    /* Today — all */
-    if (todayList) {
-      todayList.replaceChildren();
-      groups.today.forEach(function (test) {
-        todayList.appendChild(buildCard(test));
-      });
-    }
-
-    /* Yesterday — all */
-    if (yesterdayList) {
-      yesterdayList.replaceChildren();
-      groups.yesterday.forEach(function (test) {
-        yesterdayList.appendChild(buildCard(test));
-      });
-    }
-
-    /* Earlier — paginated */
-    const totalEarlierPages = Math.max(1, Math.ceil(groups.earlier.length / EARLIER_PAGE_SIZE));
-
-    if (state.earlierPage >= totalEarlierPages) {
-      state.earlierPage = totalEarlierPages - 1;
-    }
-    if (state.earlierPage < 0) {
-      state.earlierPage = 0;
-    }
-
-    const startIdx = state.earlierPage * EARLIER_PAGE_SIZE;
-    const endIdx = startIdx + EARLIER_PAGE_SIZE;
-    const earlierSlice = groups.earlier.slice(startIdx, endIdx);
-
-    if (earlierList) {
-      earlierList.replaceChildren();
-      earlierSlice.forEach(function (test) {
-        earlierList.appendChild(buildCard(test));
-      });
-    }
-
-    /* Pagination */
-    if (earlierPagination) {
-      earlierPagination.hidden = groups.earlier.length <= EARLIER_PAGE_SIZE;
-    }
-    if (earlierPageInfo) {
-      earlierPageInfo.textContent = "Page " + (state.earlierPage + 1) + " of " + totalEarlierPages;
-    }
-    if (earlierPrevBtn) {
-      earlierPrevBtn.disabled = state.earlierPage === 0;
-    }
-    if (earlierNextBtn) {
-      earlierNextBtn.disabled = state.earlierPage >= totalEarlierPages - 1;
-    }
-
-    /* Hide empty sections */
-    document.querySelectorAll(".archive-section").forEach(function (section) {
-      const group = section.getAttribute("data-group");
-      if (group === "today") section.hidden = groups.today.length === 0;
-      else if (group === "yesterday") section.hidden = groups.yesterday.length === 0;
-      else if (group === "earlier") section.hidden = groups.earlier.length === 0;
-    });
-
-    if (emptyState) {
-      emptyState.hidden = state.tests.length !== 0;
-    }
-  }
-
-  /* ---------- Fetch ---------- */
-
-  async function loadTests() {
+  function isLoggedIn() {
     try {
-      const res = await apiFetch("/tests");
-      state.tests = Array.isArray(res.tests) ? res.tests : [];
-      state.loaded = true;
-      render();
-    } catch (err) {
-      state.tests = [];
-      state.loaded = true;
-      render();
-      if (emptyState) {
-        emptyState.hidden = false;
-        emptyState.textContent = t("loadFailed");
-      }
+      const token = localStorage.getItem("pk_user_id_token");
+      const exp = parseInt(localStorage.getItem("pk_user_expires_at") || "0", 10) || 0;
+      if (!token) return false;
+      if (exp && exp < Date.now()) return false;
+      return true;
+    } catch (e) {
+      return false;
     }
   }
 
-  /* ---------- Earlier pagination handlers ---------- */
+  // ─────────────────────────────────────────────────────────
+  // MOBILE MENU
+  // ─────────────────────────────────────────────────────────
+  function initMenu() {
+    const toggle = $("menuToggle");
+    const panel = $("menuPanel");
+    if (!toggle || !panel) return;
 
-  function scrollToEarlier() {
-    const section = document.querySelector('[data-group="earlier"]');
-    if (section) {
-      section.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
-  }
-
-  if (earlierPrevBtn) {
-    earlierPrevBtn.addEventListener("click", function () {
-      if (state.earlierPage > 0) {
-        state.earlierPage--;
-        render();
-        scrollToEarlier();
-      }
+    toggle.addEventListener("click", () => {
+      const isOpen = panel.classList.toggle("open");
+      toggle.setAttribute("aria-expanded", isOpen ? "true" : "false");
+      toggle.setAttribute("aria-label", isOpen ? "Close navigation menu" : "Open navigation menu");
     });
-  }
 
-  if (earlierNextBtn) {
-    earlierNextBtn.addEventListener("click", function () {
-      const earlierCount = state.tests.filter(function (test) {
-        return groupFor(test.createdAt) === "earlier";
-      }).length;
-      const totalPages = Math.max(1, Math.ceil(earlierCount / EARLIER_PAGE_SIZE));
+    // Close on outside click
+    document.addEventListener("click", (e) => {
+      if (!panel.classList.contains("open")) return;
+      if (panel.contains(e.target) || toggle.contains(e.target)) return;
+      panel.classList.remove("open");
+      toggle.setAttribute("aria-expanded", "false");
+    });
 
-      if (state.earlierPage < totalPages - 1) {
-        state.earlierPage++;
-        render();
-        scrollToEarlier();
+    // Close on Escape
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && panel.classList.contains("open")) {
+        panel.classList.remove("open");
+        toggle.setAttribute("aria-expanded", "false");
+        toggle.focus();
       }
     });
   }
 
-  /* ---------- Mobile menu ---------- */
+  // ─────────────────────────────────────────────────────────
+  // AUTH BUTTON (Sign in / Dashboard)
+  // ─────────────────────────────────────────────────────────
+  function initAuthButton() {
+    const logged = isLoggedIn();
+    const label = logged ? "Dashboard" : "Sign in";
+    const href = logged ? "dashboard.html" : "login.html";
 
-  const hamburgerSVG =
-    '<path d="M4 7h16"></path><path d="M4 12h16"></path><path d="M4 17h16"></path>';
-  const closeSVG =
-    '<path d="m6 6 12 12"></path><path d="M18 6 6 18"></path>';
+    const btn = $("authActionBtn");
+    if (btn) {
+      btn.textContent = label;
+      btn.href = href;
+      btn.style.display = "";
+    }
 
-  function closeMenu() {
-    if (!menuPanel || !menuToggle || !menuIcon) return;
-    menuPanel.classList.remove("open");
-    menuToggle.setAttribute("aria-expanded", "false");
-    menuIcon.innerHTML = hamburgerSVG;
+    const btnM = $("authActionBtnMobile");
+    if (btnM) {
+      btnM.textContent = label;
+      btnM.href = href;
+    }
   }
 
-  function openMenu() {
-    if (!menuPanel || !menuToggle || !menuIcon) return;
-    menuPanel.classList.add("open");
-    menuToggle.setAttribute("aria-expanded", "true");
-    menuIcon.innerHTML = closeSVG;
-  }
+  // ─────────────────────────────────────────────────────────
+  // SEARCH OVERLAY
+  // ─────────────────────────────────────────────────────────
+  function initSearch() {
+    const overlay = $("searchOverlay");
+    const input = $("searchInput");
+    const closeBtn = $("searchClose");
+    const results = $("searchResults");
 
-  if (menuToggle && menuPanel && menuIcon) {
-    menuToggle.addEventListener("click", function (e) {
-      e.stopPropagation();
-      if (menuPanel.classList.contains("open")) closeMenu();
-      else openMenu();
+    if (!overlay || !input || !closeBtn || !results) return;
+
+    function open() {
+      overlay.classList.add("open");
+      overlay.setAttribute("aria-hidden", "false");
+      document.body.style.overflow = "hidden";
+      setTimeout(() => input.focus(), 50);
+    }
+
+    function close() {
+      overlay.classList.remove("open");
+      overlay.setAttribute("aria-hidden", "true");
+      document.body.style.overflow = "";
+      input.value = "";
+      results.innerHTML =
+        '<div class="search-empty" data-i18n="searchHint">Search for a mock test or teacher.</div>';
+      if (typeof applyTranslations === "function") applyTranslations();
+    }
+
+    closeBtn.addEventListener("click", close);
+
+    overlay.addEventListener("click", (e) => {
+      if (e.target === overlay) close();
     });
 
-    document.addEventListener("click", function (e) {
-      if (
-        menuPanel.classList.contains("open") &&
-        !menuPanel.contains(e.target) &&
-        !menuToggle.contains(e.target)
-      ) {
-        closeMenu();
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && overlay.classList.contains("open")) close();
+      // Open search with "/" key
+      if (e.key === "/" && !overlay.classList.contains("open")) {
+        const tag = (e.target.tagName || "").toLowerCase();
+        if (tag === "input" || tag === "textarea" || tag === "select") return;
+        e.preventDefault();
+        open();
       }
     });
 
-    menuPanel.querySelectorAll("a").forEach(function (link) {
-      link.addEventListener("click", closeMenu);
+    // Search functionality (simple client-side filter on loaded tests)
+    let debounceTimer = null;
+    input.addEventListener("input", () => {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        runSearch(input.value.trim().toLowerCase());
+      }, 200);
     });
-  }
 
-  /* ---------- Search ---------- */
+    function runSearch(query) {
+      if (!query) {
+        results.innerHTML =
+          '<div class="search-empty" data-i18n="searchHint">Search for a mock test or teacher.</div>';
+        if (typeof applyTranslations === "function") applyTranslations();
+        return;
+      }
 
-  function openSearch() {
-    if (!searchOverlay) return;
-    closeMenu();
-    searchOverlay.classList.add("open");
-    searchOverlay.setAttribute("aria-hidden", "false");
-    setTimeout(function () { if (searchInput) searchInput.focus(); }, 50);
-  }
+      const tests = window._pkAllTests || [];
+      const matches = tests.filter((t) => {
+        const hay = `${t.title || ""} ${t.subjectName || ""}`.toLowerCase();
+        return hay.includes(query);
+      }).slice(0, 20);
 
-  function closeSearch() {
-    if (!searchOverlay) return;
-    searchOverlay.classList.remove("open");
-    searchOverlay.setAttribute("aria-hidden", "true");
-    if (searchInput) searchInput.value = "";
-    renderSearchResults("");
-  }
+      if (matches.length === 0) {
+        results.innerHTML = `<div class="search-empty">No results for "${escapeHtml(query)}".</div>`;
+        return;
+      }
 
-  function renderSearchResults(query) {
-    if (!searchResults) return;
+      results.innerHTML = matches
+        .map(
+          (t) => `
+        <a class="search-result" href="#" data-test-type="${escapeHtml(t.testType)}" data-test-id="${escapeHtml(t.testId)}" data-subject-id="${escapeHtml(t.subjectId || "")}" data-is-free="${t.isFree ? "1" : "0"}">
+          <div class="search-result-title">${escapeHtml(t.title || "Test")}</div>
+          <div class="search-result-meta">${escapeHtml(t.subjectName || "")} • ${t.questionCount || 0} questions • ${t.duration || 0} min</div>
+        </a>`
+        )
+        .join("");
 
-    const q = query.trim().toLowerCase();
-    searchResults.replaceChildren();
-
-    if (!state.loaded) {
-      const div = document.createElement("div");
-      div.className = "search-empty";
-      div.textContent = t("loading");
-      searchResults.appendChild(div);
-      return;
+      // Bind click → start test
+      results.querySelectorAll(".search-result").forEach((a) => {
+        a.addEventListener("click", async (e) => {
+          e.preventDefault();
+          await startTestFromSearch(a);
+        });
+      });
     }
 
-    const matches = state.tests.filter(function (test) {
-      const haystack = [
-        test.title || "",
-        test.publisherName || "",
-        String(test.questionCount || ""),
-        String(test.minutes || "")
-      ].join(" ").toLowerCase();
-      return haystack.indexOf(q) !== -1;
-    });
+    async function startTestFromSearch(a) {
+      const testType = a.getAttribute("data-test-type");
+      const testId = a.getAttribute("data-test-id");
+      const subjectId = a.getAttribute("data-subject-id");
+      const isFree = a.getAttribute("data-is-free") === "1";
 
-    if (matches.length === 0) {
-      const div = document.createElement("div");
-      div.className = "search-empty";
-      div.textContent = q ? t("noMatches") : t("searchHint");
-      searchResults.appendChild(div);
-      return;
-    }
+      if (!isFree && !isLoggedIn()) {
+        sessionStorage.setItem(
+          "pk_redirect_after_login",
+          JSON.stringify({ type: "test", testType, testId, subjectId })
+        );
+        window.location.href = "login.html";
+        return;
+      }
 
-    matches.forEach(function (test) {
-      const a = document.createElement("a");
-      a.className = "search-result";
-      a.href = "mock-test.html?test=" + encodeURIComponent(test.id);
-      a.innerHTML = `
-        <div class="search-result-title">${escapeHTML(test.title)}</div>
-        <div class="search-result-meta">
-          ${escapeHTML(t("byLine", { name: test.publisherName || "—" }))}
-          &nbsp;·&nbsp;
-          ${Number(test.questionCount) || 0} ${escapeHTML(t("questionsUnit"))}
-          &nbsp;·&nbsp;
-          ${Number(test.minutes) || 0} ${escapeHTML(t("minutesUnit"))}
-        </div>
-      `;
-      searchResults.appendChild(a);
-    });
-  }
-
-  if (searchOpenBtn) searchOpenBtn.addEventListener("click", openSearch);
-  if (searchCloseBtn) searchCloseBtn.addEventListener("click", closeSearch);
-
-  if (searchOverlay) {
-    searchOverlay.addEventListener("click", function (e) {
-      if (e.target === searchOverlay) closeSearch();
-    });
-  }
-
-  document.addEventListener("keydown", function (e) {
-    if (e.key === "Escape") {
-      closeMenu();
-      if (searchOverlay && searchOverlay.classList.contains("open")) {
-        closeSearch();
+      try {
+        const base = window.PK_CONFIG?.API_BASE || "";
+        const res = await fetch(base + "/api/tests/start", {
+          method: "POST",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ testType, testId, subjectId })
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          if (res.status === 401) {
+            sessionStorage.setItem(
+              "pk_redirect_after_login",
+              JSON.stringify({ type: "test", testType, testId, subjectId })
+            );
+            window.location.href = "login.html";
+            return;
+          }
+          throw new Error(data.error || data.message || `HTTP ${res.status}`);
+        }
+        sessionStorage.setItem("pk_active_attempt", JSON.stringify(data));
+        window.location.href = "mock-test.html";
+      } catch (err) {
+        if (typeof window.pkToast === "function") {
+          window.pkToast(err.message || "Could not start test.", "error");
+        }
       }
     }
-  });
 
-  if (searchInput) {
-    searchInput.addEventListener("input", function () {
-      renderSearchResults(searchInput.value);
-    });
+    // Expose opener so a search icon button can trigger it
+    window.pkOpenSearch = open;
   }
 
-  /* ---------- Language change ---------- */
+  // ─────────────────────────────────────────────────────────
+  // ESCAPE HTML
+  // ─────────────────────────────────────────────────────────
+  function escapeHtml(str) {
+    if (str === null || str === undefined) return "";
+    return String(str)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
 
-  document.addEventListener("pk:langchange", function () {
-    render();
-    if (searchOverlay && searchOverlay.classList.contains("open")) {
-      renderSearchResults(searchInput ? searchInput.value : "");
-    }
-  });
+  // ─────────────────────────────────────────────────────────
+  // FOOTER YEAR
+  // ─────────────────────────────────────────────────────────
+  function initFooterYear() {
+    const el = $("currentYear");
+    if (el) el.textContent = new Date().getFullYear();
+  }
 
-  /* ---------- Init ---------- */
+  // ─────────────────────────────────────────────────────────
+  // INIT
+  // ─────────────────────────────────────────────────────────
+  function init() {
+    initMenu();
+    initAuthButton();
+    initSearch();
+    initFooterYear();
 
-  const yearEl = document.getElementById("currentYear");
-  if (yearEl) yearEl.textContent = new Date().getFullYear();
+    // Re-apply translations after any dynamic changes
+    if (typeof applyTranslations === "function") applyTranslations();
+  }
 
-  render();
-  loadTests();
-
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
 })();
