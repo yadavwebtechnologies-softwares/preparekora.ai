@@ -3,431 +3,285 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#ffffff">
-  <meta name="description" content="PrepareKora.in — Your dashboard.">
-  <title>Dashboard — PrepareKora.in</title>
+  <meta name="theme-color" content="#eef1f6">
+  <title>Dashboard — PrepareKora</title>
+  <meta name="description" content="Your PrepareKora dashboard — track your progress, attempt daily tests, and manage your subscription.">
   <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" type="image/svg+xml" href="assets/icons/favicon.svg">
   <link rel="stylesheet" href="style.css">
-  <style>
-    .dash-layout {
-      display: grid;
-      grid-template-columns: 220px 1fr;
-      gap: 0;
-      min-height: calc(100vh - 65px);
-    }
-    .dash-sidebar {
-      background: #ffffff;
-      border-right: 1px solid var(--border);
-      padding: 24px 0;
-      position: sticky;
-      top: 65px;
-      height: calc(100vh - 65px);
-      overflow-y: auto;
-    }
-    .sidebar-profile {
-      padding: 0 20px 20px;
-      border-bottom: 1px solid var(--border);
-      margin-bottom: 12px;
-    }
-    .sidebar-avatar {
-      width: 44px;
-      height: 44px;
-      border-radius: 50%;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      display: grid;
-      place-items: center;
-      overflow: hidden;
-      margin-bottom: 10px;
-    }
-    .sidebar-avatar img { width: 100%; height: 100%; object-fit: cover; }
-    .sidebar-avatar-fallback {
-      font-size: 16px;
-      font-weight: 600;
-      color: var(--accent);
-    }
-    .sidebar-name {
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--text);
-      margin: 0 0 2px;
-      overflow-wrap: anywhere;
-      line-height: 1.3;
-    }
-    .sidebar-email {
-      font-size: 11px;
-      color: var(--muted);
-      margin: 0;
-      overflow-wrap: anywhere;
-    }
-    .sidebar-streak {
-      display: inline-block;
-      margin-top: 8px;
-      padding: 3px 10px;
-      border-radius: 999px;
-      background: #fef3c7;
-      color: #b45309;
-      font-size: 11px;
-      font-weight: 700;
-    }
-    .sidebar-nav {
-      display: flex;
-      flex-direction: column;
-      padding: 0 12px;
-    }
-    .sidebar-item {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 10px 12px;
-      border-radius: 8px;
-      background: transparent;
-      border: 0;
-      color: var(--muted);
-      font-size: 13px;
-      font-weight: 500;
-      cursor: pointer;
-      text-align: left;
-      width: 100%;
-      transition: background 0.15s, color 0.15s;
-    }
-    .sidebar-item:hover {
-      background: var(--surface);
-      color: var(--text);
-    }
-    .sidebar-item.is-active {
-      background: var(--accent);
-      color: #ffffff;
-      font-weight: 600;
-    }
-    .sidebar-item svg {
-      width: 16px;
-      height: 16px;
-      stroke: currentColor;
-      fill: none;
-      stroke-width: 1.8;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-      flex-shrink: 0;
-    }
-    .sidebar-section {
-      margin-top: auto;
-      padding: 12px 12px 0;
-      border-top: 1px solid var(--border);
-    }
-    .dash-main {
-      padding: 28px 24px 40px;
-      min-width: 0;
-    }
-    .dash-panel-head {
-      margin-bottom: 20px;
-    }
-    .dash-panel-head h1 {
-      margin: 0;
-      font-size: 22px;
-      font-weight: 600;
-      letter-spacing: -0.5px;
-    }
-    .dash-panel-head p {
-      margin: 4px 0 0;
-      color: var(--muted);
-      font-size: 13px;
-    }
-    .quiz-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-      gap: 12px;
-    }
-    .quiz-card {
-      padding: 16px;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      background: #ffffff;
-      transition: border-color 0.15s, box-shadow 0.15s;
-      cursor: pointer;
-    }
-    .quiz-card:hover {
-      border-color: var(--border-strong);
-      box-shadow: 0 4px 12px rgba(163, 177, 198, 0.25);
-    }
-    .quiz-card-title {
-      margin: 0 0 10px;
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--text);
-      line-height: 1.3;
-      overflow-wrap: anywhere;
-    }
-    .quiz-card-meta {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-    }
-    .quiz-start-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      padding: 6px 12px;
-      border-radius: 999px;
-      background: var(--accent);
-      color: #ffffff;
-      font-size: 11px;
-      font-weight: 600;
-      border: 0;
-      cursor: pointer;
-    }
-    .quiz-attempted-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      padding: 6px 12px;
-      border-radius: 999px;
-      background: var(--surface);
-      color: var(--muted);
-      font-size: 11px;
-      font-weight: 600;
-      border: 1px solid var(--border);
-    }
-    .quiz-percent {
-      font-size: 11px;
-      color: var(--muted);
-      font-weight: 500;
-    }
-    .dash-mobile-toggle {
-      display: none;
-      width: 40px;
-      height: 40px;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      background: #ffffff;
-      cursor: pointer;
-      align-items: center;
-      justify-content: center;
-      margin-right: 8px;
-    }
-    .dash-mobile-toggle svg {
-      width: 20px;
-      height: 20px;
-      stroke: var(--text);
-      fill: none;
-      stroke-width: 1.8;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-    }
-    .dash-sidebar-backdrop {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.4);
-      z-index: 90;
-    }
-    .dash-sidebar-backdrop.open { display: block; }
-    .settings-card {
-      padding: 20px;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      background: #ffffff;
-      margin-bottom: 16px;
-      max-width: 560px;
-    }
-    .settings-card h2 {
-      margin: 0 0 16px;
-      font-size: 15px;
-      font-weight: 600;
-    }
-    @media (max-width: 760px) {
-      .dash-layout { grid-template-columns: 1fr; }
-      .dash-sidebar {
-        position: fixed;
-        top: 0;
-        left: 0;
-        bottom: 0;
-        width: 260px;
-        height: 100vh;
-        z-index: 100;
-        transform: translateX(-100%);
-        transition: transform 0.25s ease;
-        padding-top: 16px;
-        border-top: 0;
-      }
-      .dash-sidebar.open { transform: translateX(0); }
-      .dash-mobile-toggle { display: inline-flex; }
-      .dash-main { padding: 20px 16px 40px; }
-      .dash-panel-head h1 { font-size: 18px; }
-      .quiz-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
-      .quiz-card { padding: 12px; }
-      .quiz-card-title { font-size: 13px; margin-bottom: 8px; }
-      .quiz-start-pill, .quiz-attempted-pill { padding: 5px 10px; font-size: 10px; }
-    }
-  </style>
 </head>
-
 <body>
 
   <header class="header">
     <div class="header-inner">
-      <button class="dash-mobile-toggle" id="dashMenuToggle" type="button" aria-label="Menu">
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M4 7h16"></path>
-          <path d="M4 12h16"></path>
-          <path d="M4 17h16"></path>
-        </svg>
-      </button>
       <a class="brand" href="index.html" aria-label="PrepareKora home">
         <span class="brand-main">preparekora</span><span class="brand-in">.in</span>
       </a>
-      <div class="nav-actions" style="margin-left: auto;">
-        <button class="icon-button" id="signOutBtn" type="button" aria-label="Sign out" title="Sign out">
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-            <polyline points="16 17 21 12 16 7"></polyline>
-            <line x1="21" y1="12" x2="9" y2="12"></line>
+      <nav class="desktop-nav" aria-label="Desktop navigation">
+        <a href="index.html" data-i18n="browseTests">Mock Tests</a>
+        <a href="about.html" data-i18n="navAbout">About</a>
+      </nav>
+      <div class="nav-actions">
+        <button class="icon-button" id="menuToggle" type="button" aria-label="Open navigation menu" aria-expanded="false" aria-controls="menuPanel">
+          <svg class="pk-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M4 7h16"></path><path d="M4 12h16"></path><path d="M4 17h16"></path>
           </svg>
         </button>
       </div>
+      <nav class="menu-panel" id="menuPanel" aria-label="Mobile navigation">
+        <a href="index.html">Mock Tests</a>
+        <a href="about.html" data-i18n="navAbout">About</a>
+        <a href="find-us.html" data-i18n="navFindUs">Find Us</a>
+        <a href="#" id="logoutMobileBtn">Log out</a>
+      </nav>
     </div>
   </header>
 
-  <div class="dash-sidebar-backdrop" id="dashBackdrop"></div>
+  <main class="page-container">
 
-  <div class="dash-layout">
-
-    <!-- SIDEBAR -->
-    <aside class="dash-sidebar" id="dashSidebar">
-      <div class="sidebar-profile">
-        <div class="sidebar-avatar" id="dashAvatar"></div>
-        <p class="sidebar-name" id="profileName">—</p>
-        <p class="sidebar-email" id="profileEmail">—</p>
-        <span class="sidebar-streak" id="dashStreak" hidden></span>
+    <div class="dash-header">
+      <div>
+        <h1>Welcome, <span id="dashUserName">User</span></h1>
+        <p>User ID: <strong id="dashUserId">—</strong> · Plan: <strong id="dashUserPlan">FREE</strong></p>
       </div>
-      <nav class="sidebar-nav">
-        <button class="sidebar-item is-active" id="navQuizzes" type="button">
-          <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
-          Daily Quizzes
-        </button>
-        <button class="sidebar-item" id="navAttempts" type="button">
-          <svg viewBox="0 0 24 24"><path d="M3 3v18h18"></path><path d="M18 17V9"></path><path d="M13 17V5"></path><path d="M8 17v-3"></path></svg>
-          My Attempts
-        </button>
-        <button class="sidebar-item" id="navSettings" type="button">
-          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-          Settings
-        </button>
-        <button class="sidebar-item" id="navHelp" type="button">
-          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
-          Help
-        </button>
-        <button class="sidebar-item" id="navPurchase" type="button">
-          <svg viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
-          Purchase
-        </button>
-      </nav>
-    </aside>
+      <button class="btn btn-sm" id="logoutBtn" type="button">Log out</button>
+    </div>
 
-    <!-- MAIN CONTENT -->
-    <main class="dash-main">
+    <div class="dash-tabs" role="tablist">
+      <button class="dash-tab is-active" data-tab="overview" role="tab">Overview</button>
+      <button class="dash-tab" data-tab="daily" role="tab">Daily Tests</button>
+      <button class="dash-tab" data-tab="history" role="tab">History</button>
+      <button class="dash-tab" data-tab="results" role="tab">Results</button>
+      <button class="dash-tab" data-tab="performance" role="tab">Performance</button>
+      <button class="dash-tab" data-tab="purchase" role="tab">Purchase</button>
+      <button class="dash-tab" data-tab="profile" role="tab">Profile</button>
+      <button class="dash-tab" data-tab="settings" role="tab">Settings</button>
+      <button class="dash-tab" data-tab="notifications" role="tab">
+        Notifications <span class="badge badge-accent" id="notifBadge" hidden>0</span>
+      </button>
+      <button class="dash-tab" data-tab="support" role="tab">Support</button>
+    </div>
 
-      <!-- QUIZZES PANEL -->
-      <div id="panelQuizzes">
-        <div class="dash-panel-head">
-          <h1>Daily Quizzes</h1>
-          <p>Fresh questions every 12 hours</p>
-        </div>
-        <div id="quizzesPanelContent">
-          <div class="loading-state" style="padding: 40px 20px;"><div class="spinner"></div><span>Loading…</span></div>
-        </div>
+    <!-- OVERVIEW -->
+    <div class="dash-tab-content is-active" data-content="overview">
+      <div class="stat-grid">
+        <div class="stat-card"><p class="stat-card-label">Current Plan</p><p class="stat-card-value" id="ovPlan">—</p></div>
+        <div class="stat-card"><p class="stat-card-label">Subscription Expiry</p><p class="stat-card-value" id="ovExpiry">—</p></div>
+        <div class="stat-card"><p class="stat-card-label">Tests Attempted</p><p class="stat-card-value" id="ovAttempts">—</p></div>
+        <div class="stat-card"><p class="stat-card-label">Correct Answers</p><p class="stat-card-value" id="ovCorrect">—</p></div>
       </div>
 
-      <!-- ATTEMPTS PANEL -->
-      <div id="panelAttempts" hidden>
-        <div class="dash-panel-head">
-          <h1>My Attempts</h1>
-          <p>Your quiz and mock test history</p>
-        </div>
-        <div id="attemptsLoading" class="loading-state"><div class="spinner"></div><span>Loading…</span></div>
-        <div id="attemptsEmpty" class="empty-state" hidden style="padding: 40px 20px;">You haven't attempted any tests yet.</div>
-        <div id="attemptsList" class="admin-test-list" style="margin-top: 12px;"></div>
+      <h3 style="margin: 20px 0 12px; font-size: 16px;">Recent attempts</h3>
+      <div class="dash-list" id="ovRecent">
+        <div class="empty-state">Loading…</div>
+      </div>
+    </div>
+
+    <!-- DAILY -->
+    <div class="dash-tab-content" data-content="daily">
+      <h3 style="margin: 0 0 12px; font-size: 16px;">Today's daily mock tests</h3>
+      <div class="dash-list" id="dailyList">
+        <div class="empty-state">Loading…</div>
+      </div>
+    </div>
+
+    <!-- HISTORY -->
+    <div class="dash-tab-content" data-content="history">
+      <h3 style="margin: 0 0 12px; font-size: 16px;">Your test history</h3>
+      <div class="dash-list" id="historyList">
+        <div class="empty-state">Loading…</div>
+      </div>
+    </div>
+
+    <!-- RESULTS -->
+    <div class="dash-tab-content" data-content="results">
+      <h3 style="margin: 0 0 12px; font-size: 16px;">Your results</h3>
+      <p class="muted-text" style="margin-bottom: 12px; font-size: 13px;">Click any attempt in History to view its detailed result.</p>
+      <div class="dash-list" id="resultsList">
+        <div class="empty-state">Loading…</div>
+      </div>
+    </div>
+
+    <!-- PERFORMANCE -->
+    <div class="dash-tab-content" data-content="performance">
+      <h3 style="margin: 0 0 12px; font-size: 16px;">Performance</h3>
+      <div class="stat-grid">
+        <div class="stat-card"><p class="stat-card-label">Overall accuracy</p><p class="stat-card-value accent" id="perfAccuracy">—</p></div>
+        <div class="stat-card"><p class="stat-card-label">Correct</p><p class="stat-card-value" id="perfCorrect">—</p></div>
+        <div class="stat-card"><p class="stat-card-label">Wrong</p><p class="stat-card-value" id="perfWrong">—</p></div>
+        <div class="stat-card"><p class="stat-card-label">Unattempted</p><p class="stat-card-value" id="perfUnattempted">—</p></div>
+      </div>
+    </div>
+
+    <!-- PURCHASE -->
+    <div class="dash-tab-content" data-content="purchase">
+      <h3 style="margin: 0 0 6px; font-size: 16px;">Subscription plans</h3>
+      <p class="muted-text" style="margin-bottom: 16px; font-size: 13px;">Upgrade to unlock more daily tests and paid homepage tests.</p>
+      <div class="plan-grid" id="planGrid">
+        <div class="empty-state">Loading…</div>
       </div>
 
-      <!-- SETTINGS PANEL -->
-      <div id="panelSettings" hidden>
-        <div class="dash-panel-head">
-          <h1>Settings</h1>
-          <p>Manage your profile</p>
-        </div>
-        <div class="settings-card">
-          <h2>Display Name</h2>
-          <form id="settingsForm" novalidate>
-            <div class="form-field" style="margin-bottom: 0;">
-              <label for="displayNameInput" class="form-label">Display name</label>
-              <input id="displayNameInput" type="text" class="form-input" maxlength="60" autocomplete="name">
-              <p class="form-hint">This name appears on your dashboard and shared results.</p>
-              <p class="form-error" id="displayNameError" hidden></p>
-            </div>
-            <div class="form-actions" style="margin-top: 16px;">
-              <button class="btn btn-primary btn-sm" id="saveNameBtn" type="submit">Save</button>
-            </div>
-          </form>
+      <h3 style="margin: 28px 0 12px; font-size: 16px;">Purchase history</h3>
+      <div class="dash-list" id="purchaseHistory">
+        <div class="empty-state">Loading…</div>
+      </div>
+    </div>
+
+    <!-- PROFILE -->
+    <div class="dash-tab-content" data-content="profile">
+      <h3 style="margin: 0 0 12px; font-size: 16px;">My profile</h3>
+      <div class="card">
+        <div style="display: grid; gap: 14px;">
+          <div><div class="muted-text" style="font-size: 12px;">User ID</div><div style="font-weight: 600;" id="profUserId">—</div></div>
+          <div><div class="muted-text" style="font-size: 12px;">Display name</div><div style="font-weight: 600;" id="profName">—</div></div>
+          <div><div class="muted-text" style="font-size: 12px;">Email</div><div style="font-weight: 600;" id="profEmail">—</div></div>
+          <div><div class="muted-text" style="font-size: 12px;">Account created</div><div style="font-weight: 600;" id="profCreated">—</div></div>
+          <div><div class="muted-text" style="font-size: 12px;">Current plan</div><div style="font-weight: 600;" id="profPlan">—</div></div>
         </div>
       </div>
+    </div>
 
-      <!-- HELP PANEL -->
-      <div id="panelHelp" hidden>
-        <div class="dash-panel-head">
-          <h1>Help</h1>
-          <p>We're here for you</p>
-        </div>
-        <div class="settings-card">
-          <ul style="margin: 0; padding-left: 20px; color: var(--text); font-size: 14px; line-height: 1.9;">
-            <li>Login / sign-in problems</li>
-            <li>Quiz or test issues</li>
-            <li>Report a wrong question</li>
-            <li>Account or profile questions</li>
-          </ul>
-          <p class="muted-text" style="margin: 14px 0 0;">
-            Contact: <a href="find-us.html" style="color: var(--accent); text-decoration: underline;">Find us</a>
-          </p>
-        </div>
+    <!-- SETTINGS -->
+    <div class="dash-tab-content" data-content="settings">
+      <h3 style="margin: 0 0 16px; font-size: 16px;">Settings</h3>
+
+      <div class="card" style="margin-bottom: 16px;">
+        <h4 style="margin: 0 0 12px; font-size: 14px;">Change display name</h4>
+        <form id="displayNameForm">
+          <div class="form-field">
+            <label class="form-label" for="setDisplayName">Display name</label>
+            <input class="form-input" type="text" id="setDisplayName" required>
+          </div>
+          <button class="btn btn-primary btn-sm" type="submit" id="saveNameBtn">Save</button>
+        </form>
       </div>
 
-      <!-- PURCHASE PANEL -->
-      <div id="panelPurchase" hidden>
-        <div class="dash-panel-head">
-          <h1>Purchase</h1>
-          <p>Coming soon</p>
-        </div>
-        <div class="settings-card">
-          <p class="muted-text" style="margin: 0;">Purchases will be available here in the future.</p>
-        </div>
+      <div class="card" style="margin-bottom: 16px;">
+        <h4 style="margin: 0 0 12px; font-size: 14px;">Change password</h4>
+        <form id="changePasswordForm">
+          <div class="form-field">
+            <label class="form-label" for="oldPassword">Current password</label>
+            <input class="form-input" type="password" id="oldPassword" required autocomplete="current-password">
+          </div>
+          <div class="form-field">
+            <label class="form-label" for="newPassword">New password</label>
+            <input class="form-input" type="password" id="newPassword" required autocomplete="new-password">
+          </div>
+          <div class="form-field">
+            <label class="form-label" for="confirmNewPassword">Confirm new password</label>
+            <input class="form-input" type="password" id="confirmNewPassword" required autocomplete="new-password">
+          </div>
+          <button class="btn btn-primary btn-sm" type="submit" id="savePasswordBtn">Update password</button>
+        </form>
       </div>
 
-    </main>
-  </div>
+      <div class="card" style="margin-bottom: 16px;">
+        <h4 style="margin: 0 0 12px; font-size: 14px;">Language preference</h4>
+        <div class="form-field">
+          <label class="form-label" for="langSelect">Preferred language</label>
+          <select class="form-select" id="langSelect">
+            <option value="en">English</option>
+            <option value="as">Assamese (অসমীয়া)</option>
+          </select>
+        </div>
+        <button class="btn btn-primary btn-sm" id="saveLangBtn" type="button">Save preference</button>
+      </div>
+
+      <div class="card" style="border-color: #fecaca;">
+        <h4 style="margin: 0 0 8px; font-size: 14px; color: #7f1d1d;">Danger zone</h4>
+        <p class="muted-text" style="font-size: 12px; margin-bottom: 12px;">Deleting your account is permanent and cannot be undone.</p>
+        <button class="btn btn-danger btn-sm" id="deleteAccountBtn" type="button">Delete my account</button>
+      </div>
+    </div>
+
+    <!-- NOTIFICATIONS -->
+    <div class="dash-tab-content" data-content="notifications">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+        <h3 style="margin: 0; font-size: 16px;">Notifications</h3>
+        <button class="btn btn-sm" id="markAllReadBtn" type="button">Mark all read</button>
+      </div>
+      <div id="notifList">
+        <div class="empty-state">Loading…</div>
+      </div>
+    </div>
+
+    <!-- SUPPORT -->
+    <div class="dash-tab-content" data-content="support">
+      <h3 style="margin: 0 0 12px; font-size: 16px;">Support</h3>
+
+      <div class="card" style="margin-bottom: 16px;">
+        <h4 style="margin: 0 0 8px; font-size: 14px;">Contact us on WhatsApp</h4>
+        <p class="muted-text" style="font-size: 12px; margin-bottom: 12px;">Quickest way to reach us for purchase or support.</p>
+        <a href="#" class="btn btn-sm" id="waSupportLink" target="_blank" rel="noopener">Open WhatsApp</a>
+      </div>
+
+      <div class="card" style="margin-bottom: 16px;">
+        <h4 style="margin: 0 0 12px; font-size: 14px;">Report a problem</h4>
+        <form id="supportForm">
+          <div class="form-field">
+            <label class="form-label" for="supportSubject">Subject</label>
+            <input class="form-input" type="text" id="supportSubject" required>
+          </div>
+          <div class="form-field">
+            <label class="form-label" for="supportMessage">Message</label>
+            <textarea class="form-textarea" id="supportMessage" required></textarea>
+          </div>
+          <button class="btn btn-primary btn-sm" type="submit" id="supportSubmitBtn">Submit</button>
+        </form>
+      </div>
+
+      <div class="card">
+        <h4 style="margin: 0 0 12px; font-size: 14px;">FAQs</h4>
+        <details class="faq-item">
+          <summary>How do I upgrade my plan?</summary>
+          <p>Go to the Purchase tab, select a plan, and complete the WhatsApp flow. Our team verifies your payment and activates the plan.</p>
+        </details>
+        <details class="faq-item">
+          <summary>How many daily tests can I attempt?</summary>
+          <p>Free: 1 per slot · Basic: 2 per slot · Standard: 3 per slot · Premium: all available tests.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Can I access paid homepage tests on Free plan?</summary>
+          <p>No. Paid homepage tests require Standard or Premium plan. Forever Free tests in each subject are always available.</p>
+        </details>
+      </div>
+    </div>
+
+  </main>
 
   <footer class="footer">
     <div class="footer-inner">
       <a href="index.html" class="footer-brand">PrepareKora.in</a>
       <div class="footer-copy">© <span id="currentYear"></span> PrepareKora.in</div>
+      <nav class="footer-links" aria-label="Footer navigation">
+        <a href="about.html" data-i18n="navAbout">About</a>
+        <a href="find-us.html" data-i18n="navFindUs">Find Us</a>
+        <a href="terms.html" data-i18n="navTerms">Terms &amp; Privacy</a>
+      </nav>
     </div>
   </footer>
 
-  <div class="modal-overlay" id="signOutOverlay" hidden>
+  <!-- Confirm modal -->
+  <div class="modal-overlay" id="confirmModal">
     <div class="modal">
-      <h2>Sign out?</h2>
-      <p class="muted-text" style="margin-bottom: 20px;">You will need to sign in again to access your dashboard.</p>
+      <h2 id="confirmTitle">Confirm</h2>
+      <p class="muted-text" id="confirmMessage" style="margin-bottom: 16px;">Are you sure?</p>
       <div class="modal-actions">
-        <button class="btn btn-sm" id="signOutCancelBtn" type="button">Stay signed in</button>
-        <button class="btn btn-primary btn-sm" id="signOutConfirmBtn" type="button">Sign out</button>
+        <button class="btn btn-sm" type="button" id="confirmCancelBtn">Cancel</button>
+        <button class="btn btn-primary btn-sm" type="button" id="confirmOkBtn">Confirm</button>
       </div>
     </div>
   </div>
 
-  <div class="toast-container" id="toastContainer"></div>
+  <script>
+    window.PK_CONFIG = {
+      API_BASE: "https://preparekora-worker.yadavsubba2003.workers.dev",
+      SITE_BASE: "https://yadavwebtechnologies-softwares.github.io/preparekora"
+    };
+  </script>
 
   <script src="js/translation.js"></script>
-  <script src="js/loader.js"></script>
+  <script src="js/main.js"></script>
   <script src="js/dashboard.js"></script>
-
 </body>
 </html>
