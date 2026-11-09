@@ -1,422 +1,657 @@
-"use strict";
+// ═══════════════════════════════════════════════════════════
+// PrepareKora — Dashboard Logic
+// Tabs, data loading, forms, confirmations
+// ═══════════════════════════════════════════════════════════
 
 (function () {
-
-  const API_BASE = (function () {
-    const host = window.location.hostname;
-    const isLocal = host === "localhost" || host === "127.0.0.1" || host === "0.0.0.0" || host === "" || host.endsWith(".local");
-    return isLocal ? "http://localhost:8787/api" : "https://preparekora-api.yadavsubba2003.workers.dev/api";
-  })();
+  "use strict";
 
   const TOKEN_KEY = "pk_user_id_token";
   const EXPIRES_KEY = "pk_user_expires_at";
-  const INACTIVITY_MS = 5 * 60 * 1000;
+  const USER_KEY = "pk_user_profile";
 
-  const $id = (id) => document.getElementById(id);
+  let currentUser = null;
+  let cachedAttempts = [];
+  let confirmResolver = null;
 
-  function getToken() {
-    try { return localStorage.getItem(TOKEN_KEY) || ""; } catch (e) { return ""; }
-  }
-  function clearTokens() {
-    try { localStorage.removeItem(TOKEN_KEY); localStorage.removeItem(EXPIRES_KEY); } catch (e) {}
-  }
-  function redirectToLogin(reason) {
-    stopInactivityTimer();
-    clearTokens();
-    const url = (reason === "signout") ? "login.html?logout=1" : "login.html";
-    window.location.replace(url);
-  }
-  function esc(v) {
-    return String(v).replace(/[&<>"']/g, function (c) {
-      const m = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" };
-      return m[c];
-    });
-  }
-  function toast(msg, kind) {
-    const c = $id("toastContainer");
-    if (!c) return;
-    const el = document.createElement("div");
-    el.className = "toast" + (kind ? " " + kind : "");
-    el.textContent = msg;
-    c.appendChild(el);
-    setTimeout(function () { el.remove(); }, 3000);
-  }
-  function formatAttemptDate(ts) {
-    if (!ts) return "—";
-    const d = new Date(Number(ts));
-    if (isNaN(d.getTime())) return "—";
-    const diff = Date.now() - d.getTime();
-    const mins = Math.floor(diff / 60000);
-    if (mins < 1) return "just now";
-    if (mins < 60) return mins + "m ago";
-    if (mins < 1440) return Math.floor(mins / 60) + "h ago";
-    if (mins < 10080) return Math.floor(mins / 1440) + "d ago";
-    return d.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
-  }
-  function formatTimeTaken(sec) {
-    const s = Number(sec) || 0;
-    if (s <= 0) return "—";
-    const m = Math.floor(s / 60);
-    const r = s % 60;
-    if (m === 0) return r + "s";
-    return m + "m " + String(r).padStart(2, "0") + "s";
+  // ─────────────────────────────────────────────────────────
+  // HELPERS
+  // ─────────────────────────────────────────────────────────
+  function $(id) { return document.getElementById(id); }
+
+  function escapeHtml(str) {
+    if (str === null || str === undefined) return "";
+    return String(str)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
   }
 
-  /* ---------- PROFILE ---------- */
-
-  async function fetchProfile(token) {
-    const res = await fetch(API_BASE + "/user/profile", { headers: { "Authorization": "Bearer " + token } });
-    if (res.status === 401 || res.status === 403) throw { code: "unauth" };
-    if (!res.ok) throw { code: "http", status: res.status };
-    return await res.json();
+  function isLoggedIn() {
+    try {
+      const token = localStorage.getItem(TOKEN_KEY);
+      const exp = parseInt(localStorage.getItem(EXPIRES_KEY) || "0", 10) || 0;
+      if (!token) return false;
+      if (exp && exp < Date.now()) return false;
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
-  async function updateProfileName(token, name) {
-    const res = await fetch(API_BASE + "/user/profile", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
-      body: JSON.stringify({ name: name })
-    });
-    if (res.status === 401 || res.status === 403) throw { code: "unauth" };
-    let data = null;
-    try { data = await res.json(); } catch (e) {}
-    if (!res.ok) throw { code: "http", message: (data && data.error) || "Save failed" };
+
+  function clearSession() {
+    try {
+      localStorage.removeItem(TOKEN_KEY);
+      localStorage.removeItem(EXPIRES_KEY);
+      localStorage.removeItem(USER_KEY);
+    } catch (e) {}
+  }
+
+  function toast(msg, type) {
+    if (typeof window.pkToast === "function") {
+      window.pkToast(msg, type);
+    }
+  }
+
+  async function api(path, options) {
+    const base = window.PK_CONFIG?.API_BASE || "";
+    const opts = {
+      credentials: "include",
+      headers: { "Content-Type": "application/json", ...(options?.headers || {}) },
+      ...options
+    };
+    if (options?.body && typeof options.body === "object") {
+      opts.body = JSON.stringify(options.body);
+    }
+    const res = await fetch(base + path, opts);
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      if (res.status === 401) {
+        clearSession();
+        window.location.href = "login.html";
+        throw new Error("Session expired");
+      }
+      const err = new Error(data.error || data.message || `HTTP ${res.status}`);
+      err.status = res.status;
+      err.code = data.code;
+      throw err;
+    }
     return data;
   }
-  async function fetchUserStreak(token) {
-    try {
-      const res = await fetch(API_BASE + "/daily-quizzes/today", { headers: { "Authorization": "Bearer " + token } });
-      if (!res.ok) return 0;
-      const data = await res.json();
-      return data && data.stats ? Number(data.stats.streak) || 0 : 0;
-    } catch (e) { return 0; }
-  }
 
-  let currentProfile = null;
+  // ─────────────────────────────────────────────────────────
+  // TAB NAVIGATION
+  // ─────────────────────────────────────────────────────────
+  function initTabs() {
+    const tabs = document.querySelectorAll(".dash-tab");
+    const contents = document.querySelectorAll(".dash-tab-content");
 
-  function renderProfile(profile) {
-    currentProfile = profile;
-    const nameEl = $id("profileName");
-    const emailEl = $id("profileEmail");
-    const avatarEl = $id("dashAvatar");
-    const streakEl = $id("dashStreak");
-
-    if (nameEl) nameEl.textContent = profile.name || "User";
-    if (emailEl) emailEl.textContent = profile.email || "";
-
-    if (avatarEl) {
-      avatarEl.innerHTML = "";
-      if (profile.photoURL) {
-        const img = document.createElement("img");
-        img.src = profile.photoURL;
-        img.alt = "";
-        img.referrerPolicy = "no-referrer";
-        avatarEl.appendChild(img);
-      } else {
-        const initial = (profile.name || "U").trim().charAt(0).toUpperCase();
-        avatarEl.innerHTML = '<span class="sidebar-avatar-fallback">' + esc(initial) + '</span>';
-      }
-    }
-
-    if (streakEl && profile.streak && profile.streak > 0) {
-      streakEl.textContent = "🔥 " + profile.streak + "-day streak";
-      streakEl.hidden = false;
-    }
-
-    const nameInput = $id("displayNameInput");
-    if (nameInput) nameInput.value = profile.name || "";
-  }
-
-  /* ---------- TODAY'S QUIZZES ---------- */
-
-  async function loadTodayQuizzes() {
-    const wrap = $id("quizzesPanelContent");
-    if (!wrap) return;
-    const token = getToken();
-    if (!token) { redirectToLogin(); return; }
-
-    wrap.innerHTML = '<div class="loading-state" style="padding: 40px 20px;"><div class="spinner"></div><span>Loading…</span></div>';
-
-    try {
-      const res = await fetch(API_BASE + "/daily-quizzes/today", { headers: { "Authorization": "Bearer " + token } });
-      if (res.status === 401 || res.status === 403) { redirectToLogin(); return; }
-      if (!res.ok) {
-        wrap.innerHTML = '<div class="empty-state" style="padding: 40px 20px;">Could not load quizzes.</div>';
-        return;
-      }
-      const data = await res.json();
-      const quizzes = Array.isArray(data.quizzes) ? data.quizzes : [];
-      const date = data.date || "";
-      const slot = data.slot || "";
-
-      if (quizzes.length === 0) {
-        wrap.innerHTML = '<div class="empty-state" style="padding: 40px 20px;">No quizzes available right now. Check back soon.</div>';
-        return;
-      }
-
-      wrap.innerHTML = "";
-      const grid = document.createElement("div");
-      grid.className = "quiz-grid";
-
-      quizzes.forEach(function (q) {
-        const card = document.createElement("div");
-        card.className = "quiz-card";
-
-        if (q.attempted) {
-          card.innerHTML =
-            '<p class="quiz-card-title">' + esc(q.subjectName) + '</p>' +
-            '<div class="quiz-card-meta">' +
-              '<span class="quiz-attempted-pill">✓ ' + q.score + '/' + q.total + '</span>' +
-              '<span class="quiz-percent">' + q.percent + '%</span>' +
-            '</div>';
-          card.addEventListener("click", function () {
-            window.location.href = "result.html?date=" + encodeURIComponent(date) + "&subject=" + encodeURIComponent(q.subjectId) + "&slot=" + encodeURIComponent(slot);
-          });
-        } else {
-          card.innerHTML =
-            '<p class="quiz-card-title">' + esc(q.subjectName) + '</p>' +
-            '<div class="quiz-card-meta">' +
-              '<button class="quiz-start-pill" type="button">Start Quiz →</button>' +
-            '</div>';
-          card.querySelector(".quiz-start-pill").addEventListener("click", function (e) {
-            e.stopPropagation();
-            window.location.href = "quiz.html?date=" + encodeURIComponent(date) + "&subject=" + encodeURIComponent(q.subjectId) + "&slot=" + encodeURIComponent(slot);
-          });
-          card.addEventListener("click", function () {
-            window.location.href = "quiz.html?date=" + encodeURIComponent(date) + "&subject=" + encodeURIComponent(q.subjectId) + "&slot=" + encodeURIComponent(slot);
-          });
-        }
-        grid.appendChild(card);
+    tabs.forEach((tab) => {
+      tab.addEventListener("click", () => {
+        const key = tab.getAttribute("data-tab");
+        tabs.forEach((t) => t.classList.toggle("is-active", t === tab));
+        contents.forEach((c) => c.classList.toggle("is-active", c.getAttribute("data-content") === key));
+        loadTab(key);
       });
-      wrap.appendChild(grid);
-    } catch (err) {
-      wrap.innerHTML = '<div class="empty-state" style="padding: 40px 20px;">Network error.</div>';
-    }
-  }
-
-  /* ---------- ATTEMPTS ---------- */
-
-  async function loadAttempts() {
-    const token = getToken();
-    if (!token) return;
-    const loadingEl = $id("attemptsLoading");
-    const emptyEl = $id("attemptsEmpty");
-    const listEl = $id("attemptsList");
-    if (loadingEl) loadingEl.hidden = false;
-    if (emptyEl) emptyEl.hidden = true;
-    if (listEl) listEl.innerHTML = "";
-
-    try {
-      const [mockRes, quizRes] = await Promise.all([
-        fetch(API_BASE + "/user/attempts", { headers: { "Authorization": "Bearer " + token } }).then(function (r) { return r.ok ? r.json() : { attempts: [] }; }).catch(function () { return { attempts: [] }; }),
-        fetch(API_BASE + "/user/quiz-attempts", { headers: { "Authorization": "Bearer " + token } }).then(function (r) { return r.ok ? r.json() : { attempts: [] }; }).catch(function () { return { attempts: [] }; })
-      ]);
-
-      const mockAttempts = (Array.isArray(mockRes.attempts) ? mockRes.attempts : []).map(function (a) { return Object.assign({}, a, { _type: "mock" }); });
-      const quizAttempts = (Array.isArray(quizRes.attempts) ? quizRes.attempts : []).map(function (a) { return Object.assign({}, a, { _type: "quiz" }); });
-      const all = mockAttempts.concat(quizAttempts);
-      all.sort(function (a, b) { return (b.submittedAt || 0) - (a.submittedAt || 0); });
-
-      if (loadingEl) loadingEl.hidden = true;
-      if (all.length === 0) { if (emptyEl) emptyEl.hidden = false; return; }
-      if (!listEl) return;
-
-      all.forEach(function (a) {
-        const card = document.createElement("div");
-        card.className = "admin-test-card";
-        card.style.cursor = "pointer";
-
-        let title, subtitle, href;
-        if (a._type === "quiz") {
-          title = a.subjectName || "Quiz";
-          subtitle = "Daily Quiz · " + a.date + (a.slot ? (" (" + a.slot + ")") : "");
-          href = "result.html?date=" + encodeURIComponent(a.date) + "&subject=" + encodeURIComponent(a.subjectId) + (a.slot ? ("&slot=" + encodeURIComponent(a.slot)) : "");
-        } else {
-          title = a.testTitle || "Mock Test";
-          subtitle = "Mock Test";
-          href = "mock-test.html?test=" + encodeURIComponent(a.testId) + "&review=" + encodeURIComponent(a.id);
-        }
-
-        card.innerHTML =
-          '<div class="admin-test-info">' +
-            '<p class="admin-test-title">' + esc(title) + '</p>' +
-            '<div class="admin-test-meta">' +
-              '<span class="status-badge ' + (a._type === "quiz" ? "draft" : "published") + '">' + esc(subtitle) + '</span>' +
-              '<span>' + a.correct + '/' + a.total + ' (' + a.percent + '%)</span>' +
-              '<span>' + formatTimeTaken(a.timeTaken) + '</span>' +
-              '<span>' + formatAttemptDate(a.submittedAt) + '</span>' +
-            '</div>' +
-          '</div>';
-
-        card.addEventListener("click", function () { window.location.href = href; });
-        listEl.appendChild(card);
-      });
-    } catch (err) {
-      if (loadingEl) loadingEl.hidden = true;
-      if (emptyEl) { emptyEl.hidden = false; emptyEl.textContent = "Could not load attempts."; }
-    }
-  }
-
-  /* ---------- SIDEBAR NAV ---------- */
-
-  const panels = {
-    quizzes: { btn: $id("navQuizzes"), panel: $id("panelQuizzes") },
-    attempts: { btn: $id("navAttempts"), panel: $id("panelAttempts") },
-    settings: { btn: $id("navSettings"), panel: $id("panelSettings") },
-    help: { btn: $id("navHelp"), panel: $id("panelHelp") },
-    purchase: { btn: $id("navPurchase"), panel: $id("panelPurchase") }
-  };
-
-  function activate(name) {
-    Object.keys(panels).forEach(function (k) {
-      const p = panels[k];
-      if (!p.btn || !p.panel) return;
-      const isActive = (k === name);
-      p.btn.classList.toggle("is-active", isActive);
-      p.panel.hidden = !isActive;
     });
-    closeSidebarMobile();
-    if (name === "attempts") loadAttempts();
-    if (name === "quizzes") loadTodayQuizzes();
   }
 
-  Object.keys(panels).forEach(function (k) {
-    const p = panels[k];
-    if (!p.btn) return;
-    p.btn.addEventListener("click", function () { activate(k); });
-  });
-
-  /* ---------- MOBILE SIDEBAR ---------- */
-
-  const dashSidebar = $id("dashSidebar");
-  const dashBackdrop = $id("dashBackdrop");
-  const dashMenuToggle = $id("dashMenuToggle");
-
-  function openSidebarMobile() {
-    if (dashSidebar) dashSidebar.classList.add("open");
-    if (dashBackdrop) dashBackdrop.classList.add("open");
-  }
-  function closeSidebarMobile() {
-    if (dashSidebar) dashSidebar.classList.remove("open");
-    if (dashBackdrop) dashBackdrop.classList.remove("open");
-  }
-  if (dashMenuToggle) dashMenuToggle.addEventListener("click", openSidebarMobile);
-  if (dashBackdrop) dashBackdrop.addEventListener("click", closeSidebarMobile);
-  document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeSidebarMobile(); });
-
-  /* ---------- SIGN OUT ---------- */
-
-  function openSignOutModal() {
-    const overlay = $id("signOutOverlay");
-    if (!overlay) return;
-    overlay.hidden = false;
-    overlay.classList.add("open");
-    setTimeout(function () { const b = $id("signOutCancelBtn"); if (b) b.focus(); }, 40);
-  }
-  function closeSignOutModal() {
-    const overlay = $id("signOutOverlay");
-    if (!overlay) return;
-    overlay.hidden = true;
-    overlay.classList.remove("open");
+  function loadTab(key) {
+    if (key === "overview") loadOverview();
+    else if (key === "daily") loadDaily();
+    else if (key === "history") loadHistory();
+    else if (key === "results") loadResults();
+    else if (key === "performance") loadPerformance();
+    else if (key === "purchase") loadPurchase();
+    else if (key === "notifications") loadNotifications();
+    else if (key === "profile") loadProfile();
+    else if (key === "support") loadSupport();
   }
 
-  /* ---------- SETTINGS ---------- */
+  // ─────────────────────────────────────────────────────────
+  // OVERVIEW
+  // ─────────────────────────────────────────────────────────
+  async function loadOverview() {
+    try {
+      const [profileRes, historyRes] = await Promise.all([
+        api("/api/users/profile").catch(() => null),
+        api("/api/users/test-history").catch(() => ({ attempts: [] }))
+      ]);
+      const profile = profileRes?.user || currentUser;
+      const attempts = historyRes?.attempts || [];
 
-  function bindSettings() {
-    const form = $id("settingsForm");
-    if (!form) return;
-    form.addEventListener("submit", async function (e) {
+      $("ovPlan").textContent = (profile?.plan || "free").toUpperCase();
+      $("ovExpiry").textContent = profile?.planExpiresAt
+        ? new Date(profile.planExpiresAt).toLocaleDateString("en-IN")
+        : "—";
+      $("ovAttempts").textContent = attempts.length;
+      $("ovCorrect").textContent = profile?.stats?.totalCorrect || 0;
+
+      const recent = attempts.slice(0, 5);
+      const recentEl = $("ovRecent");
+      if (recent.length === 0) {
+        recentEl.innerHTML = '<div class="empty-state">No attempts yet. Start with a Forever Free test.</div>';
+      } else {
+        recentEl.innerHTML = recent.map(renderAttemptRow).join("");
+      }
+    } catch (err) {
+      $("ovRecent").innerHTML = '<div class="empty-state">Could not load overview.</div>';
+    }
+  }
+
+  function renderAttemptRow(a) {
+    return `
+      <div class="dash-row">
+        <div class="dash-row-info">
+          <p class="dash-row-title">${escapeHtml(a.testTitle || "Test")}</p>
+          <p class="dash-row-meta">${escapeHtml(a.subject || "")} · ${a.attemptedAt ? new Date(a.attemptedAt).toLocaleDateString("en-IN") : ""}</p>
+        </div>
+        <div class="dash-row-score">${a.percentage || 0}%</div>
+        <button class="btn btn-sm" type="button" data-view-attempt="${escapeHtml(a.id)}">View</button>
+      </div>`;
+  }
+
+  function bindAttemptView(root) {
+    root.querySelectorAll("[data-view-attempt]").forEach((btn) => {
+      btn.addEventListener("click", () => viewAttempt(btn.getAttribute("data-view-attempt")));
+    });
+  }
+
+  function viewAttempt(id) {
+    try {
+      sessionStorage.setItem("pk_view_result", JSON.stringify({ attemptId: id }));
+    } catch (e) {}
+    window.location.href = "mock-test.html?view=result&attemptId=" + encodeURIComponent(id);
+  }
+
+  // ─────────────────────────────────────────────────────────
+  // DAILY TESTS
+  // ─────────────────────────────────────────────────────────
+  async function loadDaily() {
+    const list = $("dailyList");
+    try {
+      const subjectsRes = await api("/api/public/subjects").catch(() => ({ subjects: [] }));
+      const subjects = subjectsRes.subjects || [];
+      if (subjects.length === 0) {
+        list.innerHTML = '<div class="empty-state">No subjects available yet.</div>';
+        return;
+      }
+
+      const today = new Date().toISOString().slice(0, 10);
+      const slots = ["morning", "evening"];
+      const items = [];
+
+      for (const s of subjects) {
+        for (const slot of slots) {
+          const testId = `${today}_${slot}_${s.id}`;
+          const label = slot === "morning" ? "6:00 AM" : "6:00 PM";
+          items.push(`
+            <div class="dash-row">
+              <div class="dash-row-info">
+                <p class="dash-row-title">${escapeHtml(s.name)} — ${label} slot</p>
+                <p class="dash-row-meta">Daily test · ${today}</p>
+              </div>
+              <button class="btn btn-sm btn-primary" type="button" data-start-daily="${escapeHtml(testId)}">Attempt</button>
+            </div>
+          `);
+        }
+      }
+      list.innerHTML = items.join("");
+
+      list.querySelectorAll("[data-start-daily]").forEach((btn) => {
+        btn.addEventListener("click", () => startDaily(btn, btn.getAttribute("data-start-daily")));
+      });
+    } catch (err) {
+      list.innerHTML = '<div class="empty-state">Could not load daily tests.</div>';
+    }
+  }
+
+  async function startDaily(btn, testId) {
+    btn.disabled = true;
+    try {
+      const data = await api("/api/tests/start", {
+        method: "POST",
+        body: { testType: "daily", testId }
+      });
+      sessionStorage.setItem("pk_active_attempt", JSON.stringify(data));
+      window.location.href = "mock-test.html";
+    } catch (err) {
+      if (err.code === "DAILY_QUOTA_EXCEEDED") {
+        toast("Daily quota for this slot exceeded. Upgrade your plan.", "error");
+      } else if (err.code === "SUBSCRIPTION_REQUIRED") {
+        toast("This test requires an active subscription.", "error");
+      } else if (err.code === "TEST_NOT_FOUND" || err.status === 404) {
+        toast("This test hasn't been generated yet.", "error");
+      } else {
+        toast(err.message || "Could not start test.", "error");
+      }
+      btn.disabled = false;
+    }
+  }
+
+  // ─────────────────────────────────────────────────────────
+  // HISTORY
+  // ─────────────────────────────────────────────────────────
+  async function loadHistory() {
+    const list = $("historyList");
+    try {
+      const res = await api("/api/users/test-history");
+      cachedAttempts = res.attempts || [];
+      if (cachedAttempts.length === 0) {
+        list.innerHTML = '<div class="empty-state">No tests attempted yet.</div>';
+        return;
+      }
+      list.innerHTML = cachedAttempts.map(renderAttemptRow).join("");
+      bindAttemptView(list);
+    } catch (err) {
+      list.innerHTML = '<div class="empty-state">Could not load history.</div>';
+    }
+  }
+
+  // ─────────────────────────────────────────────────────────
+  // RESULTS
+  // ─────────────────────────────────────────────────────────
+  async function loadResults() {
+    const list = $("resultsList");
+    try {
+      const res = await api("/api/users/test-history");
+      const attempts = (res.attempts || []).filter((a) => a.score !== undefined && a.score !== null);
+      if (attempts.length === 0) {
+        list.innerHTML = '<div class="empty-state">No completed results yet.</div>';
+        return;
+      }
+      list.innerHTML = attempts
+        .map(
+          (a) => `
+        <div class="dash-row">
+          <div class="dash-row-info">
+            <p class="dash-row-title">${escapeHtml(a.testTitle || "Test")}</p>
+            <p class="dash-row-meta">${escapeHtml(a.subject || "")} · ${a.score || 0} / ${a.totalMarks || 0} · ${a.percentage || 0}%</p>
+          </div>
+          <button class="btn btn-sm" type="button" data-view-attempt="${escapeHtml(a.id)}">Review</button>
+        </div>`
+        )
+        .join("");
+      bindAttemptView(list);
+    } catch (err) {
+      list.innerHTML = '<div class="empty-state">Could not load results.</div>';
+    }
+  }
+
+  // ─────────────────────────────────────────────────────────
+  // PERFORMANCE
+  // ─────────────────────────────────────────────────────────
+  async function loadPerformance() {
+    try {
+      const res = await api("/api/users/profile");
+      const stats = res.user.stats || {};
+      const total = (stats.totalCorrect || 0) + (stats.totalWrong || 0);
+      const acc = total > 0 ? Math.round((stats.totalCorrect / total) * 100) : 0;
+      $("perfAccuracy").textContent = `${acc}%`;
+      $("perfCorrect").textContent = stats.totalCorrect || 0;
+      $("perfWrong").textContent = stats.totalWrong || 0;
+      $("perfUnattempted").textContent = "—";
+    } catch (err) {
+      // silently fail
+    }
+  }
+
+  // ─────────────────────────────────────────────────────────
+  // PURCHASE
+  // ─────────────────────────────────────────────────────────
+  async function loadPurchase() {
+    const grid = $("planGrid");
+    const historyEl = $("purchaseHistory");
+
+    const plans = [
+      { id: "free", name: "Free", label: "Free Forever", price: 0, days: 0, features: ["Forever Free tests", "1 daily test / slot"] },
+      { id: "basic", name: "Basic", label: "Daily Practice", price: 19, days: 7, features: ["2 daily tests / slot"] },
+      { id: "standard", name: "Standard", label: "Complete Preparation", price: 49, days: 15, popular: true, features: ["3 daily tests / slot", "All paid homepage tests"] },
+      { id: "premium", name: "Premium", label: "Unlimited Preparation", price: 99, days: 30, features: ["All daily tests", "All paid homepage tests"] }
+    ];
+
+    grid.innerHTML = plans
+      .map(
+        (p) => `
+        <div class="plan-card ${p.popular ? "is-popular" : ""}">
+          ${p.popular ? '<span class="plan-card-label">Most popular</span>' : ""}
+          <h3>${p.name}</h3>
+          <p class="plan-card-desc">${p.label}</p>
+          <div class="plan-card-price">₹${p.price}${p.days ? `<small>/${p.days} days</small>` : ""}</div>
+          <ul class="plan-card-features">${p.features.map((f) => `<li>${f}</li>`).join("")}</ul>
+          <button class="btn btn-primary btn-block" type="button" data-plan="${p.id}">
+            ${p.id === "free" ? "Current plan" : "Upgrade"}
+          </button>
+        </div>`
+      )
+      .join("");
+
+    grid.querySelectorAll("[data-plan]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const plan = btn.getAttribute("data-plan");
+        if (plan === "free") {
+          toast("You are already on the Free plan.", "info");
+          return;
+        }
+        requestPurchase(btn, plan);
+      });
+    });
+
+    try {
+      const res = await api("/api/users/purchase-history");
+      const purchases = res.purchases || [];
+      if (purchases.length === 0) {
+        historyEl.innerHTML = '<div class="empty-state">No purchase requests yet.</div>';
+      } else {
+        historyEl.innerHTML = purchases
+          .map(
+            (p) => `
+          <div class="dash-row">
+            <div class="dash-row-info">
+              <p class="dash-row-title">${escapeHtml(p.planName || p.plan)} — ₹${p.price}</p>
+              <p class="dash-row-meta">${new Date(p.createdAt).toLocaleDateString("en-IN")} · Status: ${escapeHtml(p.paymentStatus)}</p>
+            </div>
+          </div>`
+          )
+          .join("");
+      }
+    } catch (err) {
+      historyEl.innerHTML = '<div class="empty-state">Could not load purchase history.</div>';
+    }
+  }
+
+  async function requestPurchase(btn, plan) {
+    btn.disabled = true;
+    try {
+      const data = await api("/api/users/purchase-request", {
+        method: "POST",
+        body: { plan }
+      });
+      if (data.whatsappUrl) {
+        window.open(data.whatsappUrl, "_blank");
+        toast("Purchase request created. Please complete on WhatsApp.", "success");
+      } else {
+        toast("Purchase request created but WhatsApp number not configured.", "error");
+      }
+    } catch (err) {
+      toast(err.message || "Could not create purchase request.", "error");
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  // ─────────────────────────────────────────────────────────
+  // PROFILE
+  // ─────────────────────────────────────────────────────────
+  async function loadProfile() {
+    try {
+      const res = await api("/api/users/profile");
+      const u = res.user;
+      $("profUserId").textContent = u.userId || "—";
+      $("profName").textContent = u.displayName || "—";
+      $("profEmail").textContent = u.email || "—";
+      $("profCreated").textContent = u.createdAt
+        ? new Date(u.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })
+        : "—";
+      $("profPlan").textContent = (u.plan || "free").toUpperCase();
+
+      $("setDisplayName").value = u.displayName || "";
+      if (u.preferences?.language) $("langSelect").value = u.preferences.language;
+    } catch (err) {}
+  }
+
+  // ─────────────────────────────────────────────────────────
+  // NOTIFICATIONS
+  // ─────────────────────────────────────────────────────────
+  async function loadNotifications() {
+    const list = $("notifList");
+    try {
+      const res = await api("/api/users/notifications");
+      const notifications = res.notifications || [];
+      const badge = $("notifBadge");
+      if (res.unreadCount > 0) {
+        badge.hidden = false;
+        badge.textContent = res.unreadCount;
+      } else {
+        badge.hidden = true;
+      }
+
+      if (notifications.length === 0) {
+        list.innerHTML = '<div class="empty-state">No notifications yet.</div>';
+        return;
+      }
+
+      list.innerHTML = notifications
+        .map(
+          (n) => `
+        <div class="notif-row ${n.read ? "" : "is-unread"}">
+          <div class="notif-row-body">
+            <p class="notif-row-title">${escapeHtml(n.title || "Notification")}</p>
+            <p class="notif-row-msg">${escapeHtml(n.message || "")}</p>
+            <p class="notif-row-time">${n.createdAt ? new Date(n.createdAt).toLocaleString("en-IN") : ""}</p>
+          </div>
+        </div>`
+        )
+        .join("");
+    } catch (err) {
+      list.innerHTML = '<div class="empty-state">Could not load notifications.</div>';
+    }
+  }
+
+  // ─────────────────────────────────────────────────────────
+  // SUPPORT
+  // ─────────────────────────────────────────────────────────
+  async function loadSupport() {
+    const waLink = $("waSupportLink");
+    try {
+      const res = await api("/api/public/settings");
+      const number = (res.settings?.whatsappNumber || "").replace(/\D/g, "");
+      if (number) {
+        waLink.href = `https://wa.me/${number}`;
+      } else {
+        waLink.href = "#";
+        waLink.addEventListener("click", (e) => e.preventDefault(), { once: true });
+      }
+    } catch (e) {
+      waLink.href = "#";
+    }
+  }
+
+  // ─────────────────────────────────────────────────────────
+  // FORM BINDINGS
+  // ─────────────────────────────────────────────────────────
+  function initForms() {
+    // Display name
+    $("displayNameForm").addEventListener("submit", async (e) => {
       e.preventDefault();
-      const input = $id("displayNameInput");
-      const errEl = $id("displayNameError");
-      const btn = $id("saveNameBtn");
-      const value = input.value.trim();
-      errEl.hidden = true;
-      if (!value || value.length < 2) { errEl.textContent = "Name must be at least 2 characters"; errEl.hidden = false; return; }
-      if (value.length > 60) { errEl.textContent = "Name is too long"; errEl.hidden = false; return; }
-      if (currentProfile && value === currentProfile.name) { errEl.textContent = "Already your name"; errEl.hidden = false; return; }
+      const name = $("setDisplayName").value.trim();
+      if (name.length < 2 || name.length > 80) {
+        toast("Name must be 2–80 characters.", "error");
+        return;
+      }
+      const btn = $("saveNameBtn");
       btn.disabled = true;
       try {
-        const token = getToken();
-        if (!token) { redirectToLogin(); return; }
-        const updated = await updateProfileName(token, value);
-        renderProfile(Object.assign({}, updated, { streak: currentProfile ? currentProfile.streak : 0 }));
-        toast("Name updated", "success");
+        await api("/api/users/profile", { method: "PATCH", body: { displayName: name } });
+        toast("Display name updated.", "success");
+        $("dashUserName").textContent = name;
       } catch (err) {
-        if (err && err.code === "unauth") { redirectToLogin(); return; }
-        errEl.textContent = (err && err.message) || "Could not save";
-        errEl.hidden = false;
-      } finally { btn.disabled = false; }
+        toast(err.message || "Update failed.", "error");
+      } finally {
+        btn.disabled = false;
+      }
+    });
+
+    // Password
+    $("changePasswordForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const oldPassword = $("oldPassword").value;
+      const newPassword = $("newPassword").value;
+      const confirmNewPassword = $("confirmNewPassword").value;
+      if (newPassword.length < 8) {
+        toast("Password must be at least 8 characters.", "error");
+        return;
+      }
+      if (newPassword !== confirmNewPassword) {
+        toast("Passwords do not match.", "error");
+        return;
+      }
+      const btn = $("savePasswordBtn");
+      btn.disabled = true;
+      try {
+        await api("/api/users/change-password", {
+          method: "POST",
+          body: { oldPassword, newPassword, confirmPassword: confirmNewPassword }
+        });
+        toast("Password updated.", "success");
+        $("changePasswordForm").reset();
+      } catch (err) {
+        toast(err.message || "Password change failed.", "error");
+      } finally {
+        btn.disabled = false;
+      }
+    });
+
+    // Language
+    $("saveLangBtn").addEventListener("click", async () => {
+      const lang = $("langSelect").value;
+      try {
+        await api("/api/users/profile", {
+          method: "PATCH",
+          body: { preferences: { language: lang, notifications: true } }
+        });
+        localStorage.setItem("pk_lang", lang);
+        toast("Language preference saved.", "success");
+        if (typeof setLang === "function") setLang(lang);
+      } catch (err) {
+        toast(err.message || "Update failed.", "error");
+      }
+    });
+
+    // Delete account
+    $("deleteAccountBtn").addEventListener("click", async () => {
+      const ok = await askConfirm("Delete account?", "This is permanent and cannot be undone. Type your password to confirm.");
+      if (!ok) return;
+      const password = prompt("Enter your password to confirm account deletion:");
+      if (!password) return;
+      try {
+        await api("/api/users/delete-account", {
+          method: "POST",
+          body: { confirm: "DELETE", password }
+        });
+        clearSession();
+        toast("Account deleted.", "success");
+        setTimeout(() => (window.location.href = "index.html"), 1000);
+      } catch (err) {
+        toast(err.message || "Delete failed.", "error");
+      }
+    });
+
+    // Support form
+    $("supportForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const subject = $("supportSubject").value.trim();
+      const message = $("supportMessage").value.trim();
+      if (subject.length < 3 || message.length < 10) {
+        toast("Please provide a subject and message.", "error");
+        return;
+      }
+      const btn = $("supportSubmitBtn");
+      btn.disabled = true;
+      try {
+        await api("/api/users/support", { method: "POST", body: { subject, message } });
+        toast("Support request submitted.", "success");
+        $("supportForm").reset();
+      } catch (err) {
+        toast(err.message || "Submit failed.", "error");
+      } finally {
+        btn.disabled = false;
+      }
+    });
+
+    // Mark all read
+    $("markAllReadBtn").addEventListener("click", async () => {
+      try {
+        await api("/api/users/notifications/read-all", { method: "POST" });
+        loadNotifications();
+      } catch (err) {
+        toast("Failed to mark read.", "error");
+      }
+    });
+
+    // Logout
+    const logout = async () => {
+      try {
+        await api("/api/auth/logout", { method: "POST" });
+      } catch (e) {}
+      clearSession();
+      window.location.href = "index.html";
+    };
+    $("logoutBtn").addEventListener("click", logout);
+    $("logoutMobileBtn").addEventListener("click", (e) => {
+      e.preventDefault();
+      logout();
     });
   }
 
-  /* ---------- INACTIVITY ---------- */
+  // ─────────────────────────────────────────────────────────
+  // CONFIRM MODAL
+  // ─────────────────────────────────────────────────────────
+  function askConfirm(title, message) {
+    return new Promise((resolve) => {
+      const modal = $("confirmModal");
+      $("confirmTitle").textContent = title;
+      $("confirmMessage").textContent = message;
+      modal.classList.add("open");
+      confirmResolver = resolve;
 
-  let inactivityTimerId = null;
-  function resetInactivityTimer() {
-    if (inactivityTimerId) clearTimeout(inactivityTimerId);
-    if (!getToken()) return;
-    inactivityTimerId = setTimeout(handleInactivityTimeout, INACTIVITY_MS);
-  }
-  function startInactivityTimer() {
-    resetInactivityTimer();
-    ["click", "keydown", "scroll", "touchstart", "mousemove"].forEach(function (ev) {
-      document.addEventListener(ev, resetInactivityTimer, { passive: true });
+      const onOk = () => {
+        modal.classList.remove("open");
+        confirmResolver = null;
+        resolve(true);
+      };
+      const onCancel = () => {
+        modal.classList.remove("open");
+        confirmResolver = null;
+        resolve(false);
+      };
+
+      $("confirmOkBtn").onclick = onOk;
+      $("confirmCancelBtn").onclick = onCancel;
     });
-    document.addEventListener("visibilitychange", function () {
-      if (document.visibilityState === "visible") resetInactivityTimer();
-    });
-  }
-  function stopInactivityTimer() {
-    if (inactivityTimerId) { clearTimeout(inactivityTimerId); inactivityTimerId = null; }
-  }
-  function handleInactivityTimeout() {
-    stopInactivityTimer();
-    let overlay = $id("sessionTimeoutOverlay");
-    if (!overlay) {
-      overlay = document.createElement("div");
-      overlay.id = "sessionTimeoutOverlay";
-      overlay.className = "modal-overlay";
-      overlay.hidden = true;
-      overlay.innerHTML = '<div class="modal"><h2>Session timed out</h2><p class="muted-text" style="margin-bottom: 20px;">Please sign in again.</p><div class="modal-actions"><button type="button" class="btn btn-primary" id="sessionTimeoutLoginBtn">Go to login</button></div></div>';
-      document.body.appendChild(overlay);
-      overlay.querySelector("#sessionTimeoutLoginBtn").addEventListener("click", function () { redirectToLogin("signout"); });
-    }
-    overlay.hidden = false;
-    overlay.classList.add("open");
   }
 
-  /* ---------- INIT ---------- */
-
+  // ─────────────────────────────────────────────────────────
+  // INIT
+  // ─────────────────────────────────────────────────────────
   async function init() {
-    const yearEl = $id("currentYear");
-    if (yearEl) yearEl.textContent = new Date().getFullYear();
-
-    bindSettings();
-
-    const signOutBtn = $id("signOutBtn");
-    if (signOutBtn) signOutBtn.addEventListener("click", openSignOutModal);
-    const cancelBtn = $id("signOutCancelBtn");
-    const confirmBtn = $id("signOutConfirmBtn");
-    const overlay = $id("signOutOverlay");
-    if (cancelBtn) cancelBtn.addEventListener("click", closeSignOutModal);
-    if (overlay) overlay.addEventListener("click", function (e) { if (e.target === overlay) closeSignOutModal(); });
-    if (confirmBtn) confirmBtn.addEventListener("click", function () { closeSignOutModal(); redirectToLogin("signout"); });
-    document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeSignOutModal(); });
-
-    const token = getToken();
-    if (!token) { redirectToLogin(); return; }
-    startInactivityTimer();
-
-    try {
-      const [profile, streak] = await Promise.all([fetchProfile(token), fetchUserStreak(token)]);
-      profile.streak = streak;
-      renderProfile(profile);
-      loadTodayQuizzes();
-    } catch (err) {
-      if (err && err.code === "unauth") { redirectToLogin(); return; }
-      const wrap = $id("quizzesPanelContent");
-      if (wrap) wrap.innerHTML = '<div class="empty-state" style="padding: 40px 20px;">Could not load profile. <a href="login.html" style="color: var(--accent);">Sign in again</a></div>';
+    if (!isLoggedIn()) {
+      window.location.href = "login.html";
+      return;
     }
+
+    // Load fresh profile from server
+    try {
+      const res = await api("/api/users/profile");
+      currentUser = res.user;
+      if (currentUser) {
+        $("dashUserName").textContent = currentUser.displayName || "User";
+        $("dashUserId").textContent = currentUser.userId || "—";
+        $("dashUserPlan").textContent = (currentUser.plan || "free").toUpperCase();
+      }
+    } catch (err) {
+      // Will have redirected on 401
+      return;
+    }
+
+    initTabs();
+    initForms();
+    loadOverview();
+
+    const yearEl = $("currentYear");
+    if (yearEl) yearEl.textContent = new Date().getFullYear();
   }
 
   if (document.readyState === "loading") {
@@ -424,5 +659,4 @@
   } else {
     init();
   }
-
 })();
