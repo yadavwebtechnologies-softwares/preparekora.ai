@@ -1685,3 +1685,29 @@ img { max-width: 100%; height: auto; }
     rgba(255, 255, 255, 0.25) 60%,
     transparent 100%);
 }
+/* ============================
+   Review options
+   ============================ */
+.option.is-correct {
+  border-color: var(--correct);
+  background: var(--correct-bg);
+}
+
+.option.is-correct .option-key {
+  background: var(--correct);
+  border-color: var(--correct);
+  color: #ffffff;
+  box-shadow: none;
+}
+
+.option.is-wrong {
+  border-color: var(--wrong);
+  background: var(--wrong-bg);
+}
+
+.option.is-wrong .option-key {
+  background: var(--wrong);
+  border-color: var(--wrong);
+  color: #ffffff;
+  box-shadow: none;
+}
