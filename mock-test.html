@@ -3,514 +3,228 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#ffffff">
-  <meta name="description" content="PrepareKora.in — Take a mock test and check your score.">
-  <title>Mock Test — PrepareKora.in</title>
+  <meta name="theme-color" content="#eef1f6">
+  <title>Mock Test — PrepareKora</title>
+  <meta name="description" content="Attempt mock test on PrepareKora.">
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" type="image/svg+xml" href="assets/icons/favicon.svg">
   <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" crossorigin="anonymous">
-  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" crossorigin="anonymous"></script>
 </head>
-
 <body>
 
   <header class="header">
     <div class="header-inner">
-
       <a class="brand" href="index.html" aria-label="PrepareKora home">
         <span class="brand-main">preparekora</span><span class="brand-in">.in</span>
       </a>
-
-      <nav class="desktop-nav" aria-label="Desktop navigation">
-        <a href="about.html" data-i18n="navAbout">About</a>
-        <a href="find-us.html" data-i18n="navFindUs">Find Us</a>
-        <a href="admin.html" data-i18n="navAdmin">Admin</a>
+      <nav class="desktop-nav">
+        <a href="index.html">Mock Tests</a>
       </nav>
-
       <div class="nav-actions">
-
-        <div class="lang-switch" role="group" aria-label="Language">
-          <button class="lang-btn is-active" type="button" data-lang="en" aria-pressed="true">EN</button>
-          <button class="lang-btn" type="button" data-lang="as" aria-pressed="false">অসমীয়া</button>
-        </div>
-
-        <button
-          class="icon-button"
-          id="menuToggle"
-          type="button"
-          aria-label="Open navigation menu"
-          aria-expanded="false"
-          aria-controls="menuPanel"
-        >
-          <svg id="menuIcon" viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M4 7h16"></path>
-            <path d="M4 12h16"></path>
-            <path d="M4 17h16"></path>
+        <button class="icon-button" id="menuToggle" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="menuPanel">
+          <svg class="pk-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M4 7h16"></path><path d="M4 12h16"></path><path d="M4 17h16"></path>
           </svg>
         </button>
-
       </div>
-
-      <nav class="menu-panel" id="menuPanel" aria-label="Mobile navigation">
-        <a href="about.html" data-i18n="navAbout">About</a>
-        <a href="find-us.html" data-i18n="navFindUs">Find Us</a>
-        <a href="admin.html" data-i18n="navAdmin">Admin</a>
-
-        <div class="lang-switch" role="group" aria-label="Language">
-          <button class="lang-btn is-active" type="button" data-lang="en" aria-pressed="true">EN</button>
-          <button class="lang-btn" type="button" data-lang="as" aria-pressed="false">অসমীয়া</button>
-        </div>
+      <nav class="menu-panel" id="menuPanel">
+        <a href="index.html">Mock Tests</a>
+        <a href="dashboard.html" id="dashLink">Dashboard</a>
+        <a href="#" id="exitTestBtn">Exit test</a>
       </nav>
-
     </div>
   </header>
 
-  <main class="page-container">
+  <main class="page-container" id="pkMain">
 
-    <!-- LOADING -->
-    <section id="loadingScreen">
-      <div class="loading-state">
-        <div class="spinner"></div>
-        <span data-i18n="loading">Loading…</span>
-      </div>
-    </section>
+    <!-- START SCREEN -->
+    <section id="startScreen" class="start-card card" hidden>
+      <div class="eyebrow" id="startType">Mock Test</div>
+      <h1 id="startTitle">Loading…</h1>
+      <p class="muted-text" id="startSubject"></p>
 
-    <!-- NOT FOUND -->
-    <section id="notFoundScreen" hidden>
-      <div class="card start-card">
-        <p class="eyebrow">404</p>
-        <h1 data-i18n="testNotFound">Test not found</h1>
-        <p class="muted-text" data-i18n="testNotFoundSub">
-          The test you are looking for does not exist or was removed.
-        </p>
-        <div class="form-actions">
-          <a class="btn btn-primary" href="index.html" data-i18n="backToHome">Back to home</a>
+      <div class="meta-row">
+        <div class="meta-item">
+          <span class="meta-value" id="startDuration">—</span>
+          <span class="meta-label">Minutes</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-value" id="startQuestions">—</span>
+          <span class="meta-label">Questions</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-value" id="startMarks">—</span>
+          <span class="meta-label">Total marks</span>
         </div>
       </div>
-    </section>
 
-    <!-- START -->
-    <section id="startScreen" hidden>
-      <div class="card start-card">
+      <ul class="rules">
+        <li>Timer is server-authoritative — do not refresh unnecessarily.</li>
+        <li>Correct: +1 mark · Wrong: −0.25 marks · Unattempted: 0</li>
+        <li>Auto-save runs after each answer selection.</li>
+        <li>Test auto-submits when time expires.</li>
+      </ul>
 
-        <p class="eyebrow" data-i18n="mockTestEyebrow">Mock Test</p>
-
-        <h1 id="startTitle">—</h1>
-
-        <p class="muted-text" id="startPublisher">—</p>
-
-        <div class="meta-row">
-          <div class="meta-item">
-            <span class="meta-value" id="startQuestions">0</span>
-            <span class="meta-label" data-i18n="questions">Questions</span>
-          </div>
-          <div class="meta-item">
-            <span class="meta-value" id="startMinutes">0</span>
-            <span class="meta-label" data-i18n="minutes">Minutes</span>
-          </div>
-          <div class="meta-item">
-            <span class="meta-value" id="startMarks">0</span>
-            <span class="meta-label" data-i18n="marks">Marks</span>
-          </div>
-        </div>
-
-        <ul class="rules">
-          <li data-i18n="rule1">Each question carries 1 mark.</li>
-          <li data-i18n="rule2">There is no negative marking.</li>
-          <li data-i18n="rule3">The test is submitted automatically when the timer ends.</li>
-        </ul>
-
-        <button class="btn btn-primary" id="startBtn" type="button" data-i18n="startTest">
-          Start Test
-        </button>
-
+      <div class="form-actions">
+        <button class="btn btn-primary" id="beginBtn" type="button">Begin test</button>
+        <a class="btn" href="index.html">Cancel</a>
       </div>
     </section>
 
-    <!-- NAME FORM -->
-    <section id="nameScreen" hidden>
-      <div class="card start-card">
-
-        <p class="eyebrow" data-i18n="almostThere">Almost there</p>
-
-        <h1 data-i18n="enterDetails">Enter your details</h1>
-
-        <p class="muted-text" id="nameTestInfo">—</p>
-
-        <form id="nameForm" novalidate style="margin-top: 20px;">
-
-          <div class="form-field">
-            <label for="userName" class="form-label">
-              <span data-i18n="yourName">Your name</span>
-              <span class="form-required" aria-hidden="true">*</span>
-            </label>
-            <input
-              id="userName"
-              type="text"
-              class="form-input"
-              autocomplete="name"
-              maxlength="60"
-              aria-describedby="nameError"
-            >
-            <p class="form-error" id="nameError" hidden></p>
-          </div>
-
-          <div class="form-field">
-            <label for="userWhatsApp" class="form-label" data-i18n="yourWhatsApp">
-              WhatsApp number (optional)
-            </label>
-            <input
-              id="userWhatsApp"
-              type="tel"
-              class="form-input"
-              autocomplete="tel"
-              maxlength="15"
-              inputmode="numeric"
-              aria-describedby="waHint waError"
-            >
-            <p class="form-hint" id="waHint" data-i18n="whatsAppHint">
-              Only used by the publisher if needed.
-            </p>
-            <p class="form-error" id="waError" hidden></p>
-          </div>
-
-          <div class="form-actions">
-            <button class="btn" id="backToStartBtn" type="button" data-i18n="back">Back</button>
-            <button class="btn btn-primary" id="beginTestBtn" type="submit" data-i18n="beginTest">
-              Begin test
-            </button>
-          </div>
-
-        </form>
-
-      </div>
-    </section>
-
-    <!-- TEST -->
-    <section id="testScreen" hidden>
+    <!-- EXAM SCREEN -->
+    <section id="examScreen" hidden>
 
       <div class="exam-bar">
         <div class="exam-bar-left">
-          <p class="exam-title" id="examTitle">—</p>
-          <p class="exam-sub" id="examSub">—</p>
+          <h1 class="exam-title" id="examTitle">Test</h1>
+          <p class="exam-sub" id="examSub">Question 1 of 1</p>
         </div>
-
         <div class="exam-bar-right">
-
-          <div class="timer" id="timer" role="timer" aria-live="off">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <circle cx="12" cy="13" r="8"></circle>
-              <path d="M12 9v4l2.5 2"></path>
-              <path d="M9 3h6"></path>
+          <div class="timer" id="examTimer">
+            <svg class="pk-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="12" r="9"></circle>
+              <path d="M12 7v5l3 2"></path>
             </svg>
             <span id="timerText">00:00</span>
           </div>
-
-          <button class="btn btn-sm only-mobile" id="paletteToggle" type="button" data-i18n="paletteBtn">
-            Questions
+          <button class="btn btn-sm only-mobile" id="openPaletteBtn" type="button" aria-label="Open question palette">
+            <svg class="pk-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M4 6h6M4 12h6M4 18h6M14 6h6M14 12h6M14 18h6"></path>
+            </svg>
           </button>
-
-          <button class="btn btn-primary btn-sm" id="submitBtn" type="button" data-i18n="submitTest">
-            Submit test
-          </button>
-
         </div>
       </div>
 
       <div class="exam-grid">
 
-        <div class="question-panel">
-
+        <!-- QUESTION PANEL -->
+        <article class="question-panel">
           <div class="q-head">
-            <span class="q-number" id="qNumber">—</span>
-            <span class="q-status" id="qStatus">—</span>
+            <span class="q-number" id="qNumber">Question 1</span>
+            <span class="q-status" id="qStatus">Not visited</span>
           </div>
 
-          <h2 class="q-text" id="qText">—</h2>
-
+          <div class="q-text" id="qText">—</div>
           <div class="q-latex" id="qLatex" hidden></div>
-          <div class="q-image" id="qImage" hidden></div>
 
-          <fieldset class="options" id="optionsFieldset">
-            <legend class="sr-only" id="optionsLegend" data-i18n="optionsLegend">Answer options</legend>
-          </fieldset>
-
-          <div class="numeric-input" id="numericInput" hidden>
-            <p class="form-label" style="margin-bottom: 8px;">Your answer</p>
-            <div class="numeric-display">
-              <input type="text" id="numericField" class="numeric-field" readonly inputmode="none" autocomplete="off">
-              <button type="button" id="numericClear" class="btn btn-sm">Clear</button>
-            </div>
-            <div class="keypad" id="keypad">
-              <button type="button" class="keypad-btn" data-key="7">7</button>
-              <button type="button" class="keypad-btn" data-key="8">8</button>
-              <button type="button" class="keypad-btn" data-key="9">9</button>
-              <button type="button" class="keypad-btn keypad-action" data-key="backspace" aria-label="Backspace">
-                <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"></path><path d="m18 9-6 6"></path><path d="m12 9 6 6"></path></svg>
-              </button>
-              <button type="button" class="keypad-btn" data-key="4">4</button>
-              <button type="button" class="keypad-btn" data-key="5">5</button>
-              <button type="button" class="keypad-btn" data-key="6">6</button>
-              <button type="button" class="keypad-btn" data-key=".">.</button>
-              <button type="button" class="keypad-btn" data-key="1">1</button>
-              <button type="button" class="keypad-btn" data-key="2">2</button>
-              <button type="button" class="keypad-btn" data-key="3">3</button>
-              <button type="button" class="keypad-btn" data-key="-">−</button>
-              <button type="button" class="keypad-btn keypad-wide" data-key="0">0</button>
-            </div>
-          </div>
-
-          <div class="scratchpad" id="scratchpad">
-            <button type="button" class="scratchpad-toggle" id="scratchpadToggle" aria-expanded="false">
-              <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
-              Rough work
-            </button>
-            <div class="scratchpad-body" id="scratchpadBody" hidden>
-              <canvas id="scratchpadCanvas" class="scratchpad-canvas"></canvas>
-              <div class="scratchpad-actions">
-                <button type="button" class="btn btn-sm scratchpad-mode is-active" data-mode="pen" aria-pressed="true">Pen</button>
-                <button type="button" class="btn btn-sm scratchpad-mode" data-mode="eraser" aria-pressed="false">Eraser</button>
-                <button type="button" class="btn btn-sm" id="scratchpadClear">Clear</button>
-              </div>
-            </div>
-          </div>
+          <div class="options" id="optionsList" role="radiogroup" aria-label="Answer options"></div>
 
           <div class="q-actions">
-            <button class="btn btn-sm" id="markBtn" type="button" data-i18n="markForReview">
-              Mark for review
-            </button>
-            <button class="btn btn-sm" id="clearBtn" type="button" data-i18n="clearResponse">
-              Clear response
-            </button>
-            <span class="spacer"></span>
-            <button class="btn btn-sm" id="prevBtn" type="button" data-i18n="previous">
-              Previous
-            </button>
-            <button class="btn btn-primary btn-sm" id="nextBtn" type="button" data-i18n="next">
-              Next
-            </button>
+            <button class="btn btn-sm" id="prevBtn" type="button" disabled>← Previous</button>
+            <button class="btn btn-sm" id="clearBtn" type="button">Clear response</button>
+            <button class="btn btn-sm" id="markBtn" type="button">Mark for review</button>
+            <button class="btn btn-sm btn-primary" id="nextBtn" type="button">Next →</button>
+            <button class="btn btn-sm btn-danger" id="submitBtn" type="button">Submit test</button>
           </div>
+        </article>
 
-        </div>
-
-        <aside class="palette-panel" id="palettePanel" aria-label="Question palette">
-
+        <!-- PALETTE -->
+        <aside class="palette-panel" id="palettePanel">
           <div class="palette-head">
-            <h2 data-i18n="paletteTitle">Questions</h2>
-            <button
-              class="icon-button"
-              id="paletteClose"
-              type="button"
-              aria-label="Close question palette"
-            >
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="m6 6 12 12"></path>
-                <path d="M18 6 6 18"></path>
-              </svg>
-            </button>
+            <h2>Questions</h2>
+            <button class="btn btn-sm" id="closePaletteBtn" type="button" aria-label="Close palette">✕</button>
           </div>
-
           <div class="palette-grid" id="paletteGrid"></div>
-
           <div class="legend">
-            <div class="legend-item">
-              <span class="legend-dot answered"></span>
-              <span data-i18n="legendAnswered">Answered</span>
-            </div>
-            <div class="legend-item">
-              <span class="legend-dot visited"></span>
-              <span data-i18n="legendNotAnswered">Not answered</span>
-            </div>
-            <div class="legend-item">
-              <span class="legend-dot marked"></span>
-              <span data-i18n="legendMarked">Marked</span>
-            </div>
-            <div class="legend-item">
-              <span class="legend-dot current"></span>
-              <span data-i18n="legendCurrent">Current</span>
-            </div>
+            <div class="legend-item"><span class="legend-dot"></span>Not visited</div>
+            <div class="legend-item"><span class="legend-dot visited"></span>Visited</div>
+            <div class="legend-item"><span class="legend-dot answered"></span>Answered</div>
+            <div class="legend-item"><span class="legend-dot marked"></span>Marked</div>
+            <div class="legend-item"><span class="legend-dot current"></span>Current</div>
           </div>
-
         </aside>
 
       </div>
-
     </section>
 
-    <!-- RESULT -->
+    <!-- RESULT SCREEN -->
     <section id="resultScreen" hidden>
-      <div class="card result-card">
-
-        <p class="eyebrow" data-i18n="resultEyebrow">Result</p>
-
-        <h1 id="resultTitle">—</h1>
-
-        <p class="muted-text" id="resultPublisher">—</p>
+      <div class="result-card card">
+        <div class="eyebrow" id="resultType">Test result</div>
+        <h1 id="resultTitle">Test completed</h1>
+        <p class="muted-text" id="resultSub"></p>
 
         <div class="score-block">
           <div class="score-main">
-            <span class="score-value" id="scoreValue">0</span>
-            <span class="score-total" id="scoreTotal">/ 0</span>
+            <span class="score-value" id="resultScore">0</span>
+            <span class="score-total" id="resultTotal">/ 0</span>
           </div>
-          <span class="score-percent" id="scorePercent">0%</span>
+          <span class="score-percent" id="resultPercent">0%</span>
         </div>
 
-        <div class="progress"><span id="progressFill"></span></div>
+        <div class="progress"><span id="resultProgressBar"></span></div>
 
         <div class="stat-grid">
-          <div class="stat">
-            <strong id="statCorrect">0</strong>
-            <span data-i18n="correct">Correct</span>
-          </div>
-          <div class="stat">
-            <strong id="statWrong">0</strong>
-            <span data-i18n="wrong">Wrong</span>
-          </div>
-          <div class="stat">
-            <strong id="statUnattempted">0</strong>
-            <span data-i18n="unattempted">Unattempted</span>
-          </div>
-          <div class="stat">
-            <strong id="statTime">00:00</strong>
-            <span data-i18n="timeTaken">Time taken</span>
-          </div>
+          <div class="stat"><strong id="statCorrect">0</strong><span>Correct</span></div>
+          <div class="stat"><strong id="statWrong">0</strong><span>Wrong</span></div>
+          <div class="stat"><strong id="statUnattempted">0</strong><span>Unattempted</span></div>
+          <div class="stat"><strong id="statTime">0s</strong><span>Time taken</span></div>
         </div>
 
         <div class="result-actions">
-          <button class="btn btn-primary" id="downloadBtn" type="button" data-i18n="download">
-            Download result
-          </button>
-          <button class="btn" id="retakeBtn" type="button" data-i18n="retake">Retake</button>
-          <a class="btn" href="index.html" data-i18n="home">Home</a>
+          <button class="btn btn-primary" id="reviewBtn" type="button">Review answers</button>
+          <a class="btn" href="index.html">Home</a>
+          <a class="btn" href="dashboard.html">Dashboard</a>
         </div>
-
       </div>
 
-      <div id="resultReview" style="margin-top: 16px;"></div>
+      <!-- REVIEW -->
+      <div id="reviewContainer" style="margin-top: 24px;"></div>
+    </section>
+
+    <!-- LOADING / ERROR -->
+    <section id="loadingScreen" class="loading-state">
+      <div class="spinner spinner-lg"></div>
+      <p>Loading test…</p>
+    </section>
+
+    <section id="errorScreen" class="empty-state" hidden>
+      <div class="clay-icon-hero">
+        <svg class="pk-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="12" cy="12" r="9"></circle>
+          <path d="M12 8v4"></path>
+          <path d="M12 16h.01"></path>
+        </svg>
+      </div>
+      <p id="errorText">Something went wrong.</p>
+      <a href="index.html" class="btn btn-primary" style="margin-top: 12px;">Back to home</a>
     </section>
 
   </main>
 
+  <!-- SUBMIT CONFIRM MODAL -->
+  <div class="modal-overlay" id="submitModal">
+    <div class="modal">
+      <h2>Submit test?</h2>
+      <p class="muted-text" id="submitModalText">You can review your answers before submitting.</p>
+      <div class="modal-stats">
+        <div class="modal-stat"><strong id="modalAnswered">0</strong><span>Answered</span></div>
+        <div class="modal-stat"><strong id="modalMarked">0</strong><span>Marked</span></div>
+        <div class="modal-stat"><strong id="modalUnanswered">0</strong><span>Unanswered</span></div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-sm" id="submitCancelBtn" type="button">Cancel</button>
+        <button class="btn btn-sm btn-primary" id="submitConfirmBtn" type="button">Submit</button>
+      </div>
+    </div>
+  </div>
+
   <footer class="footer">
     <div class="footer-inner">
       <a href="index.html" class="footer-brand">PrepareKora.in</a>
-      <div class="footer-copy">
-        © <span id="currentYear"></span> PrepareKora.in
-      </div>
-      <nav class="footer-links" aria-label="Footer navigation">
-        <a href="about.html" data-i18n="navAbout">About</a>
-        <a href="find-us.html" data-i18n="navFindUs">Find Us</a>
-        <a href="terms.html" data-i18n="navTerms">Terms &amp; Privacy</a>
-      </nav>
+      <div class="footer-copy">© <span id="currentYear"></span> PrepareKora.in</div>
     </div>
   </footer>
 
-  <div class="palette-backdrop" id="paletteBackdrop" hidden></div>
+  <script>
+    window.PK_CONFIG = {
+      API_BASE: "https://preparekora-worker.yadavsubba2003.workers.dev",
+      SITE_BASE: "https://yadavwebtechnologies-softwares.github.io/preparekora"
+    };
+  </script>
 
-  <div
-    class="modal-overlay"
-    id="confirmOverlay"
-    role="dialog"
-    aria-modal="true"
-    aria-labelledby="confirmTitle"
-    aria-hidden="true"
-  >
-    <div class="modal">
-      <h2 id="confirmTitle" data-i18n="confirmTitle">Submit test?</h2>
-
-      <div class="modal-stats">
-        <div class="modal-stat">
-          <strong id="confirmAnswered">0</strong>
-          <span data-i18n="confirmAnswered">Answered</span>
-        </div>
-        <div class="modal-stat">
-          <strong id="confirmUnanswered">0</strong>
-          <span data-i18n="confirmUnanswered">Unanswered</span>
-        </div>
-        <div class="modal-stat">
-          <strong id="confirmMarked">0</strong>
-          <span data-i18n="confirmMarked">Marked</span>
-        </div>
-      </div>
-
-      <div class="modal-actions">
-        <button class="btn" id="confirmCancel" type="button" data-i18n="cancel">Cancel</button>
-        <button class="btn btn-primary" id="confirmSubmit" type="button" data-i18n="confirmYes">Submit</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- INTERRUPTION MODAL -->
-  <div
-    class="modal-overlay"
-    id="interruptOverlay"
-    role="dialog"
-    aria-modal="true"
-    aria-labelledby="interruptTitle"
-    aria-hidden="true"
-  >
-    <div class="modal interrupt-modal">
-
-      <div class="modal-icon" aria-hidden="true">
-        <img src="assets/icons/warning.svg" alt="">
-      </div>
-
-      <h2 id="interruptTitle" data-i18n="interruptTitle">Test Interrupted</h2>
-
-      <p class="muted-text" data-i18n="interruptBody">
-        You left the test screen. Please stay on the test page.
-      </p>
-
-      <p class="modal-warn-count" id="interruptWarnCount"></p>
-
-      <div class="modal-actions">
-        <button
-          class="btn btn-primary"
-          id="resumeBtn"
-          type="button"
-          data-i18n="resumeTest"
-        >
-          Resume test
-        </button>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- TERMINATION MODAL -->
-  <div
-    class="modal-overlay"
-    id="terminateOverlay"
-    role="dialog"
-    aria-modal="true"
-    aria-labelledby="terminateTitle"
-    aria-hidden="true"
-  >
-    <div class="modal interrupt-modal">
-
-      <div class="modal-icon modal-icon-danger" aria-hidden="true">
-        <img src="assets/icons/terminate.svg" alt="">
-      </div>
-
-      <h2 id="terminateTitle" data-i18n="terminatedTitle">Test Terminated</h2>
-
-      <p class="muted-text" data-i18n="terminatedBody">
-        You have exceeded the allowed limit for leaving the test screen.
-        You cannot restart this test in this session.
-      </p>
-
-      <p class="modal-warn-count" id="terminateRemaining"></p>
-
-    </div>
-  </div>
-
-  <div class="sr-only" id="srStatus" role="status" aria-live="polite"></div>
-
-  <script src="js/config.js"></script>
-  <script src="js/api.js"></script>
   <script src="js/translation.js"></script>
-  <script src="js/loader.js"></script>
+  <script src="js/main.js"></script>
   <script src="js/mock-test.js"></script>
-  <script src="js/review.js"></script>
-
 </body>
 </html>
