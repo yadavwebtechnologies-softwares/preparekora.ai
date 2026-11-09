@@ -3,507 +3,206 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#ffffff">
-  <meta name="description" content="PrepareKora.in — Admin dashboard.">
-  <title>Admin — PrepareKora.in</title>
+  <meta name="theme-color" content="#eef1f6">
+  <title>Administrator — PrepareKora</title>
   <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" type="image/svg+xml" href="assets/icons/favicon.svg">
   <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
 
   <header class="header">
     <div class="header-inner">
-
       <a class="brand" href="index.html" aria-label="PrepareKora home">
         <span class="brand-main">preparekora</span><span class="brand-in">.in</span>
       </a>
-
-      <nav class="desktop-nav" aria-label="Desktop navigation">
-        <a href="about.html" data-i18n="navAbout">About</a>
-        <a href="find-us.html" data-i18n="navFindUs">Find Us</a>
-        <a href="admin.html" data-i18n="navAdmin">Admin</a>
+      <nav class="desktop-nav">
+        <a href="index.html">Home</a>
+        <a href="dashboard.html">Dashboard</a>
       </nav>
-
       <div class="nav-actions">
-
-        <div class="lang-switch" role="group" aria-label="Language">
-          <button class="lang-btn is-active" type="button" data-lang="en" aria-pressed="true">EN</button>
-          <button class="lang-btn" type="button" data-lang="as" aria-pressed="false">অসমীয়া</button>
-        </div>
-
-        <button
-          class="icon-button"
-          id="menuToggle"
-          type="button"
-          aria-label="Open navigation menu"
-          aria-expanded="false"
-          aria-controls="menuPanel"
-        >
-          <svg id="menuIcon" viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M4 7h16"></path>
-            <path d="M4 12h16"></path>
-            <path d="M4 17h16"></path>
+        <button class="icon-button" id="menuToggle" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="menuPanel">
+          <svg class="pk-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M4 7h16"></path><path d="M4 12h16"></path><path d="M4 17h16"></path>
           </svg>
         </button>
-
       </div>
-
-      <nav class="menu-panel" id="menuPanel" aria-label="Mobile navigation">
-        <a href="about.html" data-i18n="navAbout">About</a>
-        <a href="find-us.html" data-i18n="navFindUs">Find Us</a>
-        <a href="admin.html" data-i18n="navAdmin">Admin</a>
-
-        <div class="lang-switch" role="group" aria-label="Language">
-          <button class="lang-btn is-active" type="button" data-lang="en" aria-pressed="true">EN</button>
-          <button class="lang-btn" type="button" data-lang="as" aria-pressed="false">অসমীয়া</button>
-        </div>
+      <nav class="menu-panel" id="menuPanel">
+        <a href="index.html">Home</a>
+        <a href="dashboard.html">Dashboard</a>
+        <a href="#" id="adminLogoutMobileBtn">Log out</a>
       </nav>
-
     </div>
   </header>
 
-  <main class="page-container">
+  <main class="page-container" id="pkMain">
+
+    <!-- ACCESS DENIED (unauth) -->
+    <section id="accessDenied" class="empty-state" hidden>
+      <div class="clay-icon-hero">
+        <svg class="pk-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <rect x="3" y="11" width="18" height="10" rx="2"></rect>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+        </svg>
+      </div>
+      <h2 style="font-size: 20px; font-weight: 600; margin-bottom: 8px;">Access restricted</h2>
+      <p>You need to be signed in as an administrator to access this page.</p>
+      <a href="login.html" class="btn btn-primary" style="margin-top: 16px;">Sign in</a>
+    </section>
 
     <!-- LOADING -->
-    <section id="adminLoading">
-      <div class="loading-state">
-        <div class="spinner"></div>
-        <span data-i18n="loading">Loading…</span>
-      </div>
+    <section id="adminLoading" class="loading-state">
+      <div class="spinner spinner-lg"></div>
+      <p>Loading administrator panel…</p>
     </section>
 
-    <!-- LOGIN -->
-    <section id="loginScreen" hidden>
-      <div class="card login-card">
-
-        <p class="eyebrow" data-i18n="adminLogin">Admin login</p>
-        <h1 data-i18n="adminLoginSub">Sign in to manage your tests.</h1>
-
-        <form id="loginForm" novalidate style="margin-top: 20px;">
-
-          <div class="form-field">
-            <label for="loginUser" class="form-label" data-i18n="username">Username</label>
-            <input
-              id="loginUser"
-              type="email"
-              class="form-input"
-              autocomplete="username"
-              maxlength="100"
-            >
-          </div>
-
-          <div class="form-field">
-            <label for="loginPass" class="form-label" data-i18n="password">Password</label>
-            <input
-              id="loginPass"
-              type="password"
-              class="form-input"
-              autocomplete="current-password"
-              maxlength="200"
-            >
-            <p class="form-error" id="loginError" hidden></p>
-          </div>
-
-          <div class="form-actions">
-            <button class="btn btn-primary" id="loginSubmit" type="submit" data-i18n="signIn">
-              Sign in
-            </button>
-          </div>
-
-        </form>
-
-      </div>
-    </section>
-
-    <!-- DASHBOARD -->
-    <section id="dashboardScreen" hidden>
+    <!-- MAIN ADMIN UI -->
+    <section id="adminUI" hidden>
 
       <div class="admin-header">
-        <h1 data-i18n="dashboard">Dashboard</h1>
-
+        <div>
+          <h1>Administrator</h1>
+          <p class="muted-text" style="margin-top: 4px; font-size: 13px;">
+            Signed in as <strong id="adminName">—</strong>
+          </p>
+        </div>
         <div class="admin-header-actions">
-          <span class="admin-name-tag">
-            <strong id="adminDisplayName">—</strong>
-          </span>
-          <button class="btn btn-sm" id="signOutBtn" type="button" data-i18n="signOut">
-            Sign out
-          </button>
+          <button class="btn btn-sm" id="adminLogoutBtn" type="button">Log out</button>
         </div>
       </div>
 
-      <div class="card" id="activeNowCard" style="margin-bottom: 20px;">
-        <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;">
-          <div>
-            <p class="eyebrow" style="margin-bottom: 6px;">Active now</p>
-            <p style="margin: 0; font-size: 32px; font-weight: 700; letter-spacing: -1px; line-height: 1.1;" id="activeCount">—</p>
-            <p class="muted-text" style="margin: 4px 0 0; font-size: 12px;" id="activeMeta">Loading…</p>
-          </div>
-          <button class="icon-button" id="activeRefreshBtn" type="button" aria-label="Refresh active count" title="Refresh">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M21 12a9 9 0 1 1-3-6.7"></path>
-              <path d="M21 3v6h-6"></path>
-            </svg>
-          </button>
-        </div>
+      <!-- DASHBOARD STATS -->
+      <div id="adminDashboard" class="stat-grid" style="margin-bottom: 24px;">
+        <div class="stat-card"><p class="stat-card-label">Total users</p><p class="stat-card-value" id="stTotalUsers">—</p></div>
+        <div class="stat-card"><p class="stat-card-label">Active users</p><p class="stat-card-value" id="stActiveUsers">—</p></div>
+        <div class="stat-card"><p class="stat-card-label">Subjects</p><p class="stat-card-value" id="stSubjects">—</p></div>
+        <div class="stat-card"><p class="stat-card-label">Questions</p><p class="stat-card-value" id="stQuestions">—</p></div>
+        <div class="stat-card"><p class="stat-card-label">Homepage tests</p><p class="stat-card-value" id="stHomepageTests">—</p></div>
+        <div class="stat-card"><p class="stat-card-label">Daily tests</p><p class="stat-card-value" id="stDailyTests">—</p></div>
+        <div class="stat-card"><p class="stat-card-label">Pending purchases</p><p class="stat-card-value accent" id="stPendingPurchases">—</p></div>
+        <div class="stat-card"><p class="stat-card-label">Active subscriptions</p><p class="stat-card-value" id="stActiveSubs">—</p></div>
       </div>
 
       <div class="admin-tabs" role="tablist">
-        <button
-          class="admin-tab is-active"
-          id="tabTests"
-          type="button"
-          role="tab"
-          aria-selected="true"
-          data-i18n="myTests"
-        >
-          My tests
-        </button>
-        <button
-          class="admin-tab"
-          id="tabSettings"
-          type="button"
-          role="tab"
-          aria-selected="false"
-          data-i18n="settings"
-        >
-          Settings
-        </button>
-        <button
-          class="admin-tab"
-          id="tabDatabase"
-          type="button"
-          role="tab"
-          aria-selected="false"
-        >
-          Control Room
-        </button>
+        <button class="admin-tab is-active" data-tab="subjects" role="tab">Subjects</button>
+        <button class="admin-tab" data-tab="forever-free" role="tab">Forever Free</button>
+        <button class="admin-tab" data-tab="homepage-tests" role="tab">Homepage Tests</button>
+        <button class="admin-tab" data-tab="question-bank" role="tab">Question Bank</button>
+        <button class="admin-tab" data-tab="purchases" role="tab">Purchases</button>
+        <button class="admin-tab" data-tab="users" role="tab">Users</button>
+        <button class="admin-tab" data-tab="settings" role="tab">Settings</button>
+        <button class="admin-tab" data-tab="activity" role="tab">Activity</button>
       </div>
 
-      <!-- TESTS PANEL -->
-      <div id="panelTests">
-
+      <!-- SUBJECTS -->
+      <div class="admin-tab-content" data-content="subjects">
         <div class="admin-test-toolbar">
-          <div class="search-input-wrap">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
+          <button class="btn btn-primary btn-sm" id="addSubjectBtn" type="button">+ Add subject</button>
+        </div>
+        <div id="subjectsList" class="admin-test-list">
+          <div class="empty-state">Loading…</div>
+        </div>
+      </div>
+
+      <!-- FOREVER FREE -->
+      <div class="admin-tab-content" data-content="forever-free" hidden>
+        <p class="muted-text" style="margin-bottom: 14px; font-size: 13px;">
+          Every subject must have one Forever Free test. Pick a subject and configure its free test.
+        </p>
+        <div id="foreverFreeList" class="admin-test-list">
+          <div class="empty-state">Loading…</div>
+        </div>
+      </div>
+
+      <!-- HOMEPAGE TESTS -->
+      <div class="admin-tab-content" data-content="homepage-tests" hidden>
+        <div class="admin-test-toolbar">
+          <button class="btn btn-primary btn-sm" id="addHomepageTestBtn" type="button">+ Create homepage test</button>
+        </div>
+        <div id="homepageTestsList" class="admin-test-list">
+          <div class="empty-state">Loading…</div>
+        </div>
+      </div>
+
+      <!-- QUESTION BANK -->
+      <div class="admin-tab-content" data-content="question-bank" hidden>
+        <div class="admin-test-toolbar">
+          <select class="form-select" id="qbSubjectSelect" style="max-width: 300px;"></select>
+          <button class="btn btn-primary btn-sm" id="addQuestionBtn" type="button">+ Add question</button>
+          <button class="btn btn-sm" id="importQuestionsBtn" type="button">Import JSON</button>
+        </div>
+        <div id="questionBankList" class="admin-test-list">
+          <div class="empty-state">Select a subject to view its question bank.</div>
+        </div>
+      </div>
+
+      <!-- PURCHASES -->
+      <div class="admin-tab-content" data-content="purchases" hidden>
+        <div id="purchasesList" class="admin-test-list">
+          <div class="empty-state">Loading…</div>
+        </div>
+      </div>
+
+      <!-- USERS -->
+      <div class="admin-tab-content" data-content="users" hidden>
+        <div class="admin-test-toolbar">
+          <div class="search-input-wrap" style="max-width: 360px; height: 40px;">
+            <svg class="pk-icon" viewBox="0 0 24 24" aria-hidden="true">
               <circle cx="10.8" cy="10.8" r="6.8"></circle>
               <path d="m16 16 4.5 4.5"></path>
             </svg>
-            <input
-              type="search"
-              id="adminTestSearch"
-              placeholder="Search tests..."
-              autocomplete="off"
-              aria-label="Search tests"
-            >
-          </div>
-
-          <button class="btn btn-primary btn-sm" id="newTestBtn" type="button" data-i18n="newTest">
-            New test
-          </button>
-        </div>
-
-        <div id="testsLoading" class="loading-state">
-          <div class="spinner"></div>
-          <span data-i18n="loading">Loading…</span>
-        </div>
-
-        <div id="testsEmpty" class="empty-state" hidden data-i18n="noTests">
-          No tests yet. Create your first test.
-        </div>
-
-        <div class="admin-test-list" id="testsList" hidden></div>
-
-        <div class="pagination" id="testsPagination" hidden>
-          <button class="btn btn-sm" id="testsPrevBtn" type="button">← Previous</button>
-          <span class="pagination-info" id="testsPageInfo">Page 1 of 1</span>
-          <button class="btn btn-sm" id="testsNextBtn" type="button">Next →</button>
-        </div>
-
-      </div>
-
-      <!-- SETTINGS PANEL -->
-      <div id="panelSettings" hidden>
-        <div class="card" style="max-width: 480px;">
-
-          <h2 style="margin: 0 0 16px; font-size: 15px; font-weight: 600;">
-            <span data-i18n="displayName">Display name</span>
-          </h2>
-
-          <form id="settingsForm" novalidate>
-
-            <div class="form-field">
-              <label for="displayNameInput" class="form-label" data-i18n="displayName">
-                Display name
-              </label>
-              <input
-                id="displayNameInput"
-                type="text"
-                class="form-input"
-                maxlength="60"
-              >
-              <p class="form-hint">
-                Prefix "Sir" is added automatically on test cards and result images.
-              </p>
-              <p class="form-error" id="displayNameError" hidden></p>
-            </div>
-
-            <div class="form-actions">
-              <button class="btn btn-primary" id="saveNameBtn" type="submit" data-i18n="save">
-                Save
-              </button>
-            </div>
-
-          </form>
-
-        </div>
-
-        <div class="card" style="max-width: 480px; margin-top: 16px;">
-
-          <h2 style="margin: 0 0 16px; font-size: 15px; font-weight: 600;">
-            <span data-i18n="adminInterruption">Interruption warnings</span>
-          </h2>
-
-          <form id="interruptionForm" novalidate>
-
-            <div class="form-field">
-              <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; margin-bottom: 6px;">
-                <input type="checkbox" id="interruptionEnabled" style="width: 16px; height: 16px; margin: 0;">
-                <span data-i18n="adminInterruptionEnable" style="font-size: 13px; font-weight: 600;">
-                  Enable interruption warnings
-                </span>
-              </label>
-              <p class="form-hint" data-i18n="adminInterruptionEnableHint">
-                When enabled, switching tabs during a test counts as a violation.
-              </p>
-            </div>
-
-            <div class="form-field">
-              <label for="interruptionDuration" class="form-label" data-i18n="adminInterruptionDuration">
-                Termination cooldown (minutes)
-              </label>
-              <input
-                id="interruptionDuration"
-                type="number"
-                class="form-input"
-                min="1"
-                max="120"
-                step="1"
-              >
-              <p class="form-hint" data-i18n="adminInterruptionDurationHint">
-                After 5 violations, the student is blocked from retaking for this many minutes.
-              </p>
-              <p class="form-error" id="interruptionError" hidden></p>
-            </div>
-
-            <div class="form-actions">
-              <button class="btn btn-primary" id="saveInterruptionBtn" type="submit" data-i18n="save">
-                Save
-              </button>
-            </div>
-
-          </form>
-
-        </div>
-      </div>
-
-      <!-- CONTROL ROOM PANEL -->
-      <div id="panelDatabase" hidden>
-        <div class="db-layout">
-          <aside class="db-tree-panel">
-            <div class="db-tree-head">
-              <h2>Database</h2>
-              <button class="icon-button" id="dbTreeRefresh" type="button" aria-label="Refresh">
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                  <path d="M21 12a9 9 0 1 1-3-6.7"></path>
-                  <path d="M21 3v6h-6"></path>
-                </svg>
-              </button>
-            </div>
-            <div class="db-tree" id="dbTree">
-              <div class="db-empty-small">Loading…</div>
-            </div>
-          </aside>
-          <div class="db-viewer">
-            <div class="db-viewer-head">
-              <span class="db-viewer-path" id="dbViewerPath">Select a node</span>
-            </div>
-            <div class="db-viewer-body" id="dbViewerBody">
-              <div class="db-empty">Select a node from the tree to view its contents</div>
-            </div>
+            <input type="search" id="userSearchInput" placeholder="Search by email, name or user ID…" style="height: 38px; border: 0; outline: none; background: transparent; width: 100%;" />
           </div>
         </div>
-      </div>
-
-    </section>
-
-    <!-- EDITOR -->
-    <section id="editorScreen" hidden>
-
-      <div class="admin-header">
-        <h1 id="editorHeading">New test</h1>
-        <div class="admin-header-actions">
-          <button class="btn btn-sm" id="editorBackBtn" type="button" data-i18n="backToTests">
-            Back to tests
-          </button>
+        <div id="usersList" class="admin-test-list">
+          <div class="empty-state">Loading…</div>
         </div>
       </div>
 
-      <div class="editor-layout">
-
-        <div class="editor-card">
-          <h2>Test details</h2>
-
-          <div class="editor-grid-2">
-            <div class="form-field">
-              <label for="editorTitle" class="form-label" data-i18n="testTitle">
-                Test title
-              </label>
-              <input
-                id="editorTitle"
-                type="text"
-                class="form-input"
-                maxlength="200"
-              >
-            </div>
-
-            <div class="form-field">
-              <label for="editorMinutes" class="form-label" data-i18n="durationMinutes">
-                Duration (minutes)
-              </label>
-              <input
-                id="editorMinutes"
-                type="number"
-                class="form-input"
-                min="1"
-                max="180"
-                step="1"
-              >
-            </div>
+      <!-- SETTINGS -->
+      <div class="admin-tab-content" data-content="settings" hidden>
+        <form id="settingsForm" class="card" style="display: grid; gap: 16px;">
+          <div class="form-field">
+            <label class="form-label" for="settingBrandName">Brand name</label>
+            <input class="form-input" type="text" id="settingBrandName" placeholder="PrepareKora">
           </div>
+          <div class="form-field">
+            <label class="form-label" for="settingWhatsapp">WhatsApp number</label>
+            <input class="form-input" type="text" id="settingWhatsapp" placeholder="+91 …">
+          </div>
+          <div class="form-field">
+            <label class="form-label" for="settingContactEmail">Contact email</label>
+            <input class="form-input" type="email" id="settingContactEmail" placeholder="contact@example.com">
+          </div>
+          <div class="form-field">
+            <label class="form-label" for="settingHeroHeading">Hero heading</label>
+            <input class="form-input" type="text" id="settingHeroHeading">
+          </div>
+          <div class="form-field">
+            <label class="form-label" for="settingHeroDesc">Hero description</label>
+            <textarea class="form-textarea" id="settingHeroDesc" rows="3"></textarea>
+          </div>
+          <div class="form-field">
+            <label class="form-label" for="settingAbout">About content</label>
+            <textarea class="form-textarea" id="settingAbout" rows="4"></textarea>
+          </div>
+          <div class="form-field">
+            <label class="form-label">
+              <input type="checkbox" id="settingMaintenanceMode"> Maintenance mode
+            </label>
+            <input class="form-input" type="text" id="settingMaintenanceMessage" placeholder="We'll be back shortly." style="margin-top: 8px;">
+          </div>
+          <div class="form-actions">
+            <button class="btn btn-primary" type="submit" id="saveSettingsBtn">Save settings</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- ACTIVITY LOGS -->
+      <div class="admin-tab-content" data-content="activity" hidden>
+        <div id="activityList" class="admin-test-list">
+          <div class="empty-state">Loading…</div>
         </div>
-
-        <div class="editor-card">
-          <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 16px;">
-            <h2 style="margin: 0;">Questions</h2>
-            <button class="btn btn-sm" id="addQuestionBtn" type="button" data-i18n="addQuestion">
-              Add question
-            </button>
-          </div>
-
-          <div id="questionsContainer"></div>
-
-          <p class="form-error" id="editorError" hidden></p>
-
-          <div class="editor-actions">
-            <button class="btn btn-sm" id="saveDraftBtn" type="button" data-i18n="saveDraft">
-              Save draft
-            </button>
-            <button class="btn btn-primary btn-sm" id="publishBtn" type="button" data-i18n="publishNow">
-              Publish now
-            </button>
-          </div>
-        </div>
-
-      </div>
-
-    </section>
-
-    <!-- SUBMISSIONS VIEWER -->
-    <section id="submissionsScreen" hidden>
-
-      <div class="submissions-header">
-        <h1 id="submissionsTitle">—</h1>
-        <div class="submissions-header-actions">
-          <button class="btn btn-sm" id="openAnalysisBtn" type="button">
-            Wrong Analysis
-          </button>
-          <button class="btn btn-sm" id="submissionsBackBtn" type="button" data-i18n="backToTests">
-            Back to tests
-          </button>
-        </div>
-      </div>
-
-      <div id="submissionsLoading" class="loading-state">
-        <div class="spinner"></div>
-        <span data-i18n="loading">Loading…</span>
-      </div>
-
-      <div id="submissionsEmpty" class="empty-state" hidden>
-        No submissions yet.
-      </div>
-
-      <div id="submissionsBody" hidden>
-        <div class="submissions-stats">
-          <div class="submission-stat">
-            <strong id="submissionsTotal">0</strong>
-            <span>Submissions</span>
-          </div>
-          <div class="submission-stat">
-            <strong id="submissionsAvg">0%</strong>
-            <span>Average score</span>
-          </div>
-          <div class="submission-stat">
-            <strong id="submissionsTop">0%</strong>
-            <span>Top score</span>
-          </div>
-        </div>
-
-        <div class="submissions-list" id="submissionsList"></div>
-      </div>
-
-    </section>
-
-    <!-- WRONG ANALYSIS -->
-    <section id="analysisScreen" hidden>
-
-      <div class="submissions-header">
-        <h1 id="analysisTitle">Wrong Analysis</h1>
-        <div class="submissions-header-actions">
-          <button class="btn btn-sm" id="analysisBackBtn" type="button">
-            Back to submissions
-          </button>
-        </div>
-      </div>
-
-      <div id="analysisLoading" class="loading-state">
-        <div class="spinner"></div>
-        <span data-i18n="loading">Loading…</span>
-      </div>
-
-      <div id="analysisEmpty" class="empty-state" hidden>
-        Not enough data yet.
-      </div>
-
-      <div id="analysisBody" hidden>
-
-        <div class="submissions-stats">
-          <div class="submission-stat">
-            <strong id="analysisSubs">0</strong>
-            <span>Submissions</span>
-          </div>
-          <div class="submission-stat">
-            <strong id="analysisWrong">0</strong>
-            <span>Total wrong attempts</span>
-          </div>
-          <div class="submission-stat">
-            <strong id="analysisToughest">—</strong>
-            <span>Toughest question</span>
-          </div>
-        </div>
-
-        <div class="admin-tabs" role="tablist">
-          <button class="admin-tab is-active" id="analysisTabByQ" type="button" role="tab" aria-selected="true">
-            By Question
-          </button>
-          <button class="admin-tab" id="analysisTabTough" type="button" role="tab" aria-selected="false">
-            Toughest Question
-          </button>
-        </div>
-
-        <div id="analysisByQ"></div>
-        <div id="analysisByTough" hidden></div>
-
       </div>
 
     </section>
@@ -513,26 +212,178 @@
   <footer class="footer">
     <div class="footer-inner">
       <a href="index.html" class="footer-brand">PrepareKora.in</a>
-
-      <div class="footer-copy">
-        © <span id="currentYear"></span> PrepareKora.in
-      </div>
-
-      <nav class="footer-links" aria-label="Footer navigation">
-        <a href="about.html" data-i18n="navAbout">About</a>
-        <a href="find-us.html" data-i18n="navFindUs">Find Us</a>
-        <a href="terms.html" data-i18n="navTerms">Terms &amp; Privacy</a>
-      </nav>
+      <div class="footer-copy">© <span id="currentYear"></span> PrepareKora.in</div>
     </div>
   </footer>
 
-  <div class="toast-container" id="toastContainer"></div>
+  <!-- MODAL: Subject -->
+  <div class="modal-overlay" id="subjectModal">
+    <div class="modal">
+      <h2 id="subjectModalTitle">Add subject</h2>
+      <form id="subjectForm">
+        <input type="hidden" id="subjectFormId">
+        <div class="form-field">
+          <label class="form-label" for="subjectName">Name (English)</label>
+          <input class="form-input" type="text" id="subjectName" required>
+        </div>
+        <div class="form-field">
+          <label class="form-label" for="subjectNameAs">Name (Assamese)</label>
+          <input class="form-input" type="text" id="subjectNameAs">
+        </div>
+        <div class="form-field">
+          <label class="form-label" for="subjectDescription">Description</label>
+          <textarea class="form-textarea" id="subjectDescription" rows="2"></textarea>
+        </div>
+        <div class="modal-actions">
+          <button class="btn btn-sm" type="button" id="subjectCancelBtn">Cancel</button>
+          <button class="btn btn-primary btn-sm" type="submit" id="subjectSaveBtn">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
-  <script src="js/config.js"></script>
+  <!-- MODAL: Forever Free editor -->
+  <div class="modal-overlay" id="foreverFreeModal">
+    <div class="modal" style="max-width: 640px;">
+      <h2 id="ffModalTitle">Configure Forever Free test</h2>
+      <form id="ffForm">
+        <div class="form-field">
+          <label class="form-label" for="ffTitle">Title</label>
+          <input class="form-input" type="text" id="ffTitle" required>
+        </div>
+        <div class="form-field">
+          <label class="form-label" for="ffDuration">Duration (minutes)</label>
+          <input class="form-input" type="number" id="ffDuration" min="1" value="15" required>
+        </div>
+        <div class="form-field">
+          <label class="form-label" for="ffQuestionsJson">Questions (JSON array)</label>
+          <textarea class="form-textarea" id="ffQuestionsJson" rows="10" style="font-family: monospace; font-size: 12px;" required></textarea>
+        </div>
+        <div class="modal-actions">
+          <button class="btn btn-sm" type="button" id="ffCancelBtn">Cancel</button>
+          <button class="btn btn-primary btn-sm" type="submit" id="ffSaveBtn">Save test</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: Homepage test -->
+  <div class="modal-overlay" id="homepageTestModal">
+    <div class="modal" style="max-width: 640px;">
+      <h2 id="hpModalTitle">Create homepage test</h2>
+      <form id="hpForm">
+        <input type="hidden" id="hpTestId">
+        <div class="form-field">
+          <label class="form-label" for="hpTitle">Title</label>
+          <input class="form-input" type="text" id="hpTitle" required>
+        </div>
+        <div class="form-field">
+          <label class="form-label" for="hpSubjectId">Subject</label>
+          <select class="form-select" id="hpSubjectId" required></select>
+        </div>
+        <div class="form-field">
+          <label class="form-label" for="hpDuration">Duration (minutes)</label>
+          <input class="form-input" type="number" id="hpDuration" min="1" value="30">
+        </div>
+        <div class="form-field">
+          <label class="form-label">
+            <input type="checkbox" id="hpIsPaid" checked> Paid test (requires subscription)
+          </label>
+        </div>
+        <div class="form-field">
+          <label class="form-label" for="hpQuestionsJson">Questions (JSON array)</label>
+          <textarea class="form-textarea" id="hpQuestionsJson" rows="10" style="font-family: monospace; font-size: 12px;" required></textarea>
+        </div>
+        <div class="form-field">
+          <label class="form-label" for="hpStatus">Status</label>
+          <select class="form-select" id="hpStatus">
+            <option value="draft">Draft</option>
+            <option value="published">Published</option>
+          </select>
+        </div>
+        <div class="modal-actions">
+          <button class="btn btn-sm" type="button" id="hpCancelBtn">Cancel</button>
+          <button class="btn btn-primary btn-sm" type="submit" id="hpSaveBtn">Save test</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: Question editor -->
+  <div class="modal-overlay" id="questionModal">
+    <div class="modal" style="max-width: 640px;">
+      <h2 id="qModalTitle">Add question</h2>
+      <form id="questionForm">
+        <input type="hidden" id="qEditId">
+        <div class="form-field">
+          <label class="form-label" for="qExternalId">External ID</label>
+          <input class="form-input" type="text" id="qExternalId" placeholder="e.g. GK-0001" required>
+        </div>
+        <div class="form-field">
+          <label class="form-label" for="qTextEn">Question (English)</label>
+          <textarea class="form-textarea" id="qTextEn" rows="2" required></textarea>
+        </div>
+        <div class="form-field">
+          <label class="form-label" for="qTextAs">Question (Assamese)</label>
+          <textarea class="form-textarea" id="qTextAs" rows="2"></textarea>
+        </div>
+        <div class="form-field">
+          <label class="form-label">Options</label>
+          <div id="qOptionsContainer" style="display: grid; gap: 8px;"></div>
+        </div>
+        <div class="form-field">
+          <label class="form-label" for="qCorrect">Correct option ID (A/B/C/D)</label>
+          <input class="form-input" type="text" id="qCorrect" maxlength="2" required>
+        </div>
+        <div class="form-field">
+          <label class="form-label" for="qMarks">Marks</label>
+          <input class="form-input" type="number" id="qMarks" min="1" value="1">
+        </div>
+        <div class="form-field">
+          <label class="form-label" for="qDifficulty">Difficulty</label>
+          <select class="form-select" id="qDifficulty">
+            <option value="easy">Easy</option>
+            <option value="medium" selected>Medium</option>
+            <option value="hard">Hard</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label class="form-label" for="qExplanationEn">Explanation (English)</label>
+          <textarea class="form-textarea" id="qExplanationEn" rows="2"></textarea>
+        </div>
+        <div class="form-field">
+          <label class="form-label" for="qExplanationAs">Explanation (Assamese)</label>
+          <textarea class="form-textarea" id="qExplanationAs" rows="2"></textarea>
+        </div>
+        <div class="modal-actions">
+          <button class="btn btn-sm" type="button" id="qCancelBtn">Cancel</button>
+          <button class="btn btn-primary btn-sm" type="submit" id="qSaveBtn">Save question</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: Confirm -->
+  <div class="modal-overlay" id="confirmModal">
+    <div class="modal">
+      <h2 id="confirmTitle">Confirm</h2>
+      <p class="muted-text" id="confirmMessage" style="margin-bottom: 16px;">Are you sure?</p>
+      <div class="modal-actions">
+        <button class="btn btn-sm" type="button" id="confirmCancelBtn">Cancel</button>
+        <button class="btn btn-primary btn-sm" type="button" id="confirmOkBtn">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    window.PK_CONFIG = {
+      API_BASE: "https://preparekora-worker.yadavsubba2003.workers.dev",
+      SITE_BASE: "https://yadavwebtechnologies-softwares.github.io/preparekora"
+    };
+  </script>
+
   <script src="js/translation.js"></script>
-  <script src="js/loader.js"></script>
+  <script src="js/main.js"></script>
   <script src="js/admin.js"></script>
-  <script src="js/control-room.js"></script>
-
 </body>
 </html>
