@@ -64,7 +64,6 @@
       </nav>
 
       <div class="nav-actions">
-
         <a class="btn btn-sm" id="authActionBtn" href="login.html" style="display: none;">
           Sign in
         </a>
@@ -88,7 +87,6 @@
             <path d="M4 17h16"></path>
           </svg>
         </button>
-
       </div>
 
       <nav class="menu-panel" id="menuPanel" aria-label="Mobile navigation">
@@ -108,25 +106,11 @@
 
   <main class="page-container">
 
-    <!-- HERO -->
-    <section class="hero">
-      <h1 data-i18n="heroTitle">Prepare smarter. Practise better. Score higher.</h1>
-      <p data-i18n="heroSubtitle">
-        Free ADRE and Assam competitive exam mock tests, with daily practice, bilingual questions, and instant performance tracking.
-      </p>
-      <div class="hero-actions">
-        <a class="btn btn-primary" href="signup.html" data-i18n="createAccount">Create free account</a>
-        <a class="btn" href="#todayTests" data-i18n="browseTests">Browse mock tests</a>
-      </div>
-    </section>
-
-    <!-- PAGE HEADING -->
     <section class="page-heading">
       <h1 data-i18n="mockTestsHeading">Mock Tests</h1>
       <p data-i18n="mockTestsSub">Explore mock tests and prepare for your next exam.</p>
     </section>
 
-    <!-- ARCHIVE -->
     <div id="testArchive" class="loading-section loading">
       <div class="loading-overlay" role="status" aria-label="Loading tests">
         <div class="spinner spinner-lg"></div>
@@ -182,7 +166,6 @@
     </div>
   </footer>
 
-  <!-- SEARCH OVERLAY -->
   <div
     class="search-overlay"
     id="searchOverlay"
@@ -192,42 +175,33 @@
     aria-hidden="true"
   >
     <div class="search-box">
-
       <div class="search-top">
-
         <div class="search-input-wrap">
           <svg class="pk-icon" viewBox="0 0 24 24" aria-hidden="true">
             <circle cx="10.8" cy="10.8" r="6.8"></circle>
             <path d="m16 16 4.5 4.5"></path>
           </svg>
-
           <input
             type="search"
             id="searchInput"
-            placeholder="Search tests or teachers..."
-            data-i18n-placeholder="searchPlaceholder"
+            placeholder="Search tests..."
             autocomplete="off"
-            aria-label="Search tests or teachers"
+            aria-label="Search tests"
           >
         </div>
-
         <button id="searchClose" type="button" aria-label="Close search">
           <svg class="pk-icon" viewBox="0 0 24 24" aria-hidden="true">
             <path d="m6 6 12 12"></path>
             <path d="M18 6 6 18"></path>
           </svg>
         </button>
-
       </div>
-
       <div class="search-results" id="searchResults">
-        <div class="search-empty" data-i18n="searchHint">Search for a mock test or teacher.</div>
+        <div class="search-empty" data-i18n="searchHint">Search for a mock test.</div>
       </div>
-
     </div>
   </div>
 
-  <!-- CONFIG (single source of truth for API base) -->
   <script>
     window.PK_CONFIG = {
       API_BASE: "https://preparekora-worker.yadavsubba2003.workers.dev",
