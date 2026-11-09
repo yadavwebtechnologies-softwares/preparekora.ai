@@ -108,12 +108,12 @@ img { max-width: 100%; height: auto; }
 .header-inner {
   position: relative;
   max-width: 1000px;
-  min-height: 65px;
+  min-height: 60px;
   margin: 0 auto;
-  padding: 0 20px;
+  padding: 0 16px;
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
 }
 
 .brand {
@@ -263,7 +263,7 @@ img { max-width: 100%; height: auto; }
   max-width: 1000px;
   min-height: calc(100vh - 140px);
   margin: 0 auto;
-  padding: 36px 20px 55px;
+  padding: 24px 16px 40px;
 }
 
 .page-heading { margin-bottom: 28px; }
@@ -321,7 +321,7 @@ img { max-width: 100%; height: auto; }
 /* ============================
    Test Archive
    ============================ */
-.archive-section { margin-top: 30px; }
+.archive-section { margin-top: 20px; }
 
 .archive-heading {
   display: flex;
@@ -351,8 +351,8 @@ img { max-width: 100%; height: auto; }
 .test-card {
   display: flex;
   align-items: center;
-  gap: 15px;
-  padding: 16px;
+  gap: 12px;
+  padding: 12px 14px;
   border: 1px solid rgba(216, 222, 232, 0.6);
   border-radius: var(--radius);
   background: #ffffff;
@@ -419,17 +419,18 @@ img { max-width: 100%; height: auto; }
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  min-width: 76px;
-  padding: 9px 16px;
+  min-width: 66px;
+  padding: 7px 14px;
   border: 1px solid var(--accent);
   border-radius: var(--radius-xs);
   background: var(--accent);
   color: #ffffff;
   font-size: 12px;
   font-weight: 600;
+  line-height: 1.2;
   text-align: center;
   box-shadow:
-    0 4px 12px rgba(74, 111, 165, 0.35),
+    0 3px 8px rgba(74, 111, 165, 0.3),
     inset 0 1px 0 rgba(255, 255, 255, 0.25);
   transition: background var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast);
 }
@@ -624,14 +625,15 @@ img { max-width: 100%; height: auto; }
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  padding: 10px 18px;
+  gap: 6px;
+  padding: 7px 14px;
   border: 1px solid rgba(216, 222, 232, 0.6);
   border-radius: var(--radius-xs);
   background: #ffffff;
   color: var(--text);
   font-size: 13px;
   font-weight: 500;
+  line-height: 1.2;
   cursor: pointer;
   white-space: nowrap;
   text-align: center;
@@ -674,8 +676,8 @@ img { max-width: 100%; height: auto; }
 
 .btn-danger:hover { background: #991b1b; border-color: #991b1b; }
 
-.btn-sm { padding: 8px 14px; font-size: 12px; }
-.btn-lg { padding: 14px 24px; font-size: 14px; }
+.btn-sm { padding: 6px 12px; font-size: 12px; }
+.btn-lg { padding: 10px 20px; font-size: 14px; }
 .btn-block { width: 100%; }
 
 .btn:disabled {
