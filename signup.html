@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#eef1f6">
+  <title>Create account — PrepareKora</title>
+  <meta name="description" content="Create your free PrepareKora account and start practising for ADRE, Assam Police and other competitive exams.">
+  <link rel="canonical" href="https://yadavwebtechnologies-softwares.github.io/preparekora/signup.html">
+  <link rel="icon" type="image/svg+xml" href="assets/icons/favicon.svg">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <header class="header">
+    <div class="header-inner">
+      <a class="brand" href="index.html" aria-label="PrepareKora home">
+        <span class="brand-main">preparekora</span><span class="brand-in">.in</span>
+      </a>
+      <nav class="desktop-nav" aria-label="Desktop navigation">
+        <a href="about.html" data-i18n="navAbout">About</a>
+        <a href="find-us.html" data-i18n="navFindUs">Find Us</a>
+      </nav>
+      <div class="nav-actions">
+        <div class="lang-switch" role="group" aria-label="Language">
+          <button class="lang-btn is-active" type="button" data-lang="en" aria-pressed="true">EN</button>
+          <button class="lang-btn" type="button" data-lang="as" aria-pressed="false">অসমীয়া</button>
+        </div>
+        <button class="icon-button" id="menuToggle" type="button" aria-label="Open navigation menu" aria-expanded="false" aria-controls="menuPanel">
+          <svg class="pk-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M4 7h16"></path><path d="M4 12h16"></path><path d="M4 17h16"></path>
+          </svg>
+        </button>
+      </div>
+      <nav class="menu-panel" id="menuPanel" aria-label="Mobile navigation">
+        <a href="about.html" data-i18n="navAbout">About</a>
+        <a href="find-us.html" data-i18n="navFindUs">Find Us</a>
+        <div class="lang-switch" role="group" aria-label="Language">
+          <button class="lang-btn is-active" type="button" data-lang="en" aria-pressed="true">EN</button>
+          <button class="lang-btn" type="button" data-lang="as" aria-pressed="false">অসমীয়া</button>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <main class="page-container">
+    <div class="auth-wrap">
+      <div class="auth-card">
+        <h1 data-i18n="signupTitle">Create your account</h1>
+        <p class="muted-text" data-i18n="signupSubtitle">Start your free preparation journey today.</p>
+
+        <div id="signupError" class="auth-alert" hidden role="alert"></div>
+
+        <form id="signupForm" novalidate>
+          <div class="form-field">
+            <label class="form-label" for="signupName" data-i18n="fullNameLabel">Full name</label>
+            <input class="form-input" type="text" id="signupName" name="fullName" autocomplete="name" required>
+            <div class="form-error" data-error-for="signupName" hidden></div>
+          </div>
+
+          <div class="form-field">
+            <label class="form-label" for="signupEmail" data-i18n="emailLabel">Email address</label>
+            <input class="form-input" type="email" id="signupEmail" name="email" autocomplete="email" required>
+            <div class="form-error" data-error-for="signupEmail" hidden></div>
+          </div>
+
+          <div class="form-field">
+            <label class="form-label" for="signupPassword" data-i18n="passwordLabel">Password</label>
+            <input class="form-input" type="password" id="signupPassword" name="password" autocomplete="new-password" required>
+            <p class="form-hint">Minimum 8 characters</p>
+            <div class="form-error" data-error-for="signupPassword" hidden></div>
+          </div>
+
+          <div class="form-field">
+            <label class="form-label" for="signupConfirm" data-i18n="confirmPasswordLabel">Confirm password</label>
+            <input class="form-input" type="password" id="signupConfirm" name="confirmPassword" autocomplete="new-password" required>
+            <div class="form-error" data-error-for="signupConfirm" hidden></div>
+          </div>
+
+          <button class="btn btn-primary btn-block" type="submit" id="signupBtn">
+            <span class="btn-label" data-i18n="signupBtn">Create account</span>
+          </button>
+        </form>
+
+        <div class="auth-footer">
+          <span data-i18n="haveAccount">Already have an account?</span>
+          <a href="login.html" data-i18n="loginInstead">Log in</a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      <a href="index.html" class="footer-brand">PrepareKora.in</a>
+      <div class="footer-copy">© <span id="currentYear"></span> PrepareKora.in</div>
+      <nav class="footer-links" aria-label="Footer navigation">
+        <a href="about.html" data-i18n="navAbout">About</a>
+        <a href="find-us.html" data-i18n="navFindUs">Find Us</a>
+        <a href="terms.html" data-i18n="navTerms">Terms &amp; Privacy</a>
+      </nav>
+    </div>
+  </footer>
+
+  <script>
+    window.PK_CONFIG = {
+      API_BASE: "https://preparekora-worker.yadavsubba2003.workers.dev",
+      SITE_BASE: "https://yadavwebtechnologies-softwares.github.io/preparekora"
+    };
+  </script>
+
+  <script src="js/translation.js"></script>
+  <script src="js/main.js"></script>
+  <script src="js/auth.js"></script>
+</body>
+</html>
