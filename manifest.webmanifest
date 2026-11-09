@@ -1,0 +1,34 @@
+{
+  "name": "PrepareKora — Assam Exam Mock Tests",
+  "short_name": "PrepareKora",
+  "description": "Free ADRE and Assam competitive exam mock tests, with daily practice and performance tracking.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#eef1f6",
+  "theme_color": "#eef1f6",
+  "lang": "en-IN",
+  "dir": "ltr",
+  "categories": ["education", "productivity"],
+  "icons": [
+    {
+      "src": "assets/icons/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Mock Tests",
+      "url": "./index.html",
+      "description": "Browse mock tests"
+    },
+    {
+      "name": "Dashboard",
+      "url": "./dashboard.html",
+      "description": "Your dashboard"
+    }
+  ]
+}
