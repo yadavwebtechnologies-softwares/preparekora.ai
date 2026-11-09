@@ -1558,3 +1558,130 @@ img { max-width: 100%; height: auto; }
     transition-duration: 0.01ms !important;
   }
 }
+/* =========================================================
+   === ICON SYSTEM (Claymorphism) ===
+   ========================================================= */
+
+/* Base icon style — everything inherits */
+.pk-icon {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vertical-align: middle;
+  transition: transform var(--transition-fast);
+}
+
+.pk-icon-sm { width: 16px; height: 16px; stroke-width: 2.2; }
+.pk-icon-lg { width: 24px; height: 24px; }
+.pk-icon-xl { width: 28px; height: 28px; }
+
+/* Clay icon container (for wrapping an icon in a soft clay bubble) */
+.clay-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid rgba(216, 222, 232, 0.6);
+  border-radius: var(--radius-sm);
+  background: #ffffff;
+  box-shadow: var(--shadow-sm);
+  color: var(--text);
+  transition: box-shadow var(--transition-fast), transform var(--transition-fast);
+}
+
+.clay-icon:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+.clay-icon.accent {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #ffffff;
+  box-shadow:
+    0 4px 12px rgba(74, 111, 165, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+.clay-icon.lg {
+  width: 52px;
+  height: 52px;
+  border-radius: var(--radius);
+}
+
+.clay-icon.lg .pk-icon { width: 26px; height: 26px; }
+
+/* Icon button — clickable clay button */
+.icon-button .pk-icon {
+  width: 21px;
+  height: 21px;
+}
+
+/* Floating/claymorphic icon (for empty states) */
+.clay-icon-hero {
+  display: inline-grid;
+  place-items: center;
+  width: 80px;
+  height: 80px;
+  border-radius: var(--radius);
+  background: var(--surface);
+  border: 1px solid rgba(216, 222, 232, 0.6);
+  box-shadow:
+    0 8px 20px rgba(163, 177, 198, 0.4),
+    inset 0 2px 4px rgba(255, 255, 255, 0.9),
+    inset 0 -2px 4px rgba(163, 177, 198, 0.15);
+  color: var(--muted);
+  margin: 0 auto 16px;
+}
+
+.clay-icon-hero .pk-icon {
+  width: 36px;
+  height: 36px;
+  stroke-width: 1.6;
+}
+
+/* Ripple on icon buttons */
+.icon-button,
+.clay-icon {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.icon-button::after,
+.clay-icon::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 20px;
+  margin: -10px 0 0 -10px;
+  border-radius: 50%;
+  background: radial-gradient(circle,
+    rgba(74, 111, 165, 0.45) 0%,
+    rgba(74, 111, 165, 0.15) 60%,
+    transparent 100%);
+  pointer-events: none;
+  opacity: 0;
+  transform: scale(0);
+  z-index: -1;
+}
+
+.icon-button:active::after,
+.clay-icon:active::after {
+  animation: pk-ripple 0.55s ease-out;
+}
+
+.clay-icon.accent::after {
+  background: radial-gradient(circle,
+    rgba(255, 255, 255, 0.55) 0%,
+    rgba(255, 255, 255, 0.25) 60%,
+    transparent 100%);
+}
