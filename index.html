@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#eef1f6">
+  <meta name="theme-color" content="#fafafa">
 
   <meta name="google-site-verification" content="019QB1KSc-V0ZLpoQcA3cgsxIPKZK4McHGZNi3ZNO9E" />
 
   <title>PrepareKora — Free Mock Tests for ADRE, Assam Direct Recruitment & Assam Govt Exams</title>
-  <meta name="description" content="Free ADRE mock tests for Grade 3 & Grade 4 — Assam Direct Recruitment Exam practice in English and Assamese. Full-length ADRE mock test series with MCQs, Math, Reasoning, timer, instant results.">
-  <meta name="keywords" content="ADRE mock test, free ADRE mock test, ADRE Grade 3 mock test, ADRE Grade 4 mock test, Assam Direct Recruitment Exam, Assam Police mock test, Assam TET mock test, Assam competitive exams, PrepareKora">
+  <meta name="description" content="Free ADRE mock tests for Grade 3 & Grade 4 — Assam Direct Recruitment Exam practice in English and Assamese. Full-length mock test series with timer and instant results.">
+  <meta name="keywords" content="ADRE mock test, free ADRE mock test, ADRE Grade 3 mock test, ADRE Grade 4 mock test, Assam Direct Recruitment Exam, Assam Police mock test, Assam competitive exams, PrepareKora">
   <meta name="author" content="PrepareKora">
   <meta name="robots" content="index, follow, max-image-preview:large">
   <link rel="canonical" href="https://yadavwebtechnologies-softwares.github.io/preparekora/">
@@ -35,24 +35,23 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
 
+  <!-- ═══════════ HEADER ═══════════ -->
   <header class="header">
     <div class="header-inner">
-
       <a class="brand" href="index.html" aria-label="PrepareKora home">
         <span class="brand-main">preparekora</span><span class="brand-in">.in</span>
       </a>
 
-      <nav class="nav-desktop" aria-label="Primary">
-        <a href="about.html">About</a>
-        <a href="find-us.html">Find Us</a>
-        <a href="admin.html">Administrator</a>
+      <nav class="nav-desktop" aria-label="Primary navigation">
+        <a href="about.html" data-i18n="navAbout">About</a>
+        <a href="find-us.html" data-i18n="navFindUs">Find Us</a>
+        <a href="admin.html" data-i18n="navAdmin">Administrator</a>
       </nav>
 
       <div class="header-actions">
-        <a class="btn btn-sm btn-auth" id="authActionBtn" href="login.html" style="display:none;">Sign in</a>
+        <a class="btn btn-sm" id="authActionBtn" href="login.html" style="display:none;" data-i18n="signIn">Sign in</a>
 
         <button class="icon-btn" id="searchToggle" type="button" aria-label="Search tests">
           <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -74,25 +73,24 @@
       </div>
 
       <nav class="menu-panel" id="menuPanel" aria-label="Mobile navigation">
-        <a href="about.html">About</a>
-        <a href="find-us.html">Find Us</a>
-        <a href="admin.html">Administrator</a>
-        <a href="login.html" id="authActionBtnMobile">Sign in</a>
+        <a href="about.html" data-i18n="navAbout">About</a>
+        <a href="find-us.html" data-i18n="navFindUs">Find Us</a>
+        <a href="admin.html" data-i18n="navAdmin">Administrator</a>
+        <a href="login.html" id="authActionBtnMobile" data-i18n="signIn">Sign in</a>
 
         <div class="lang-switch" role="group" aria-label="Language">
           <button class="lang-btn is-active" type="button" data-lang="en" aria-pressed="true">EN</button>
           <button class="lang-btn" type="button" data-lang="as" aria-pressed="false">অসমীয়া</button>
         </div>
       </nav>
-
     </div>
   </header>
 
+  <!-- ═══════════ MAIN ═══════════ -->
   <main class="page">
-
     <div class="page-head">
-      <h1>Mock Tests</h1>
-      <p>Practice, track progress, and prepare for your next exam.</p>
+      <h1 data-i18n="mockTestsHeading">Mock Tests</h1>
+      <p data-i18n="mockTestsSub">Practice, track progress, and prepare for your next exam.</p>
     </div>
 
     <div id="testArchive" class="loading-section loading">
@@ -100,53 +98,47 @@
         <div class="spinner spinner-lg"></div>
       </div>
 
-      <section class="archive-section" data-group="today">
-        <h2 class="archive-head">Today</h2>
+      <section class="archive" data-group="today">
+        <h2 class="archive-head" data-i18n="today">Today</h2>
         <div class="test-list" id="todayTests"></div>
       </section>
 
-      <section class="archive-section" data-group="yesterday">
-        <h2 class="archive-head">Yesterday</h2>
+      <section class="archive" data-group="yesterday">
+        <h2 class="archive-head" data-i18n="yesterday">Yesterday</h2>
         <div class="test-list" id="yesterdayTests"></div>
       </section>
 
-      <section class="archive-section" data-group="earlier">
-        <h2 class="archive-head">Earlier</h2>
+      <section class="archive" data-group="earlier">
+        <h2 class="archive-head" data-i18n="earlier">Earlier</h2>
         <div class="test-list" id="earlierTests"></div>
 
         <div class="pagination" id="earlierPagination" hidden>
-          <button class="btn btn-sm" id="earlierPrevBtn" type="button">← Previous</button>
+          <button class="btn btn-sm" id="earlierPrevBtn" type="button" data-i18n="prev">← Previous</button>
           <span class="pagination-info" id="earlierPageInfo">Page 1 of 1</span>
-          <button class="btn btn-sm" id="earlierNextBtn" type="button">Next →</button>
+          <button class="btn btn-sm" id="earlierNextBtn" type="button" data-i18n="next">Next →</button>
         </div>
       </section>
 
       <div class="empty-state" id="archiveEmpty" hidden>
-        <div class="empty-icon">
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-          </svg>
-        </div>
-        <p>No mock tests available.</p>
+        <p data-i18n="noMockTests">No mock tests available.</p>
       </div>
     </div>
-
   </main>
 
+  <!-- ═══════════ FOOTER ═══════════ -->
   <footer class="footer">
     <div class="footer-inner">
       <a href="index.html" class="footer-brand">PrepareKora.in</a>
-
       <div class="footer-copy">© <span id="currentYear"></span> PrepareKora.in</div>
-
       <nav class="footer-links" aria-label="Footer">
-        <a href="about.html">About</a>
-        <a href="find-us.html">Find Us</a>
-        <a href="terms.html">Terms &amp; Privacy</a>
+        <a href="about.html" data-i18n="navAbout">About</a>
+        <a href="find-us.html" data-i18n="navFindUs">Find Us</a>
+        <a href="terms.html" data-i18n="navTerms">Terms &amp; Privacy</a>
       </nav>
     </div>
   </footer>
 
+  <!-- ═══════════ SEARCH OVERLAY ═══════════ -->
   <div class="search-overlay" id="searchOverlay" role="dialog" aria-modal="true" aria-label="Search tests" aria-hidden="true">
     <div class="search-box">
       <div class="search-top">
@@ -164,11 +156,12 @@
         </button>
       </div>
       <div class="search-results" id="searchResults">
-        <div class="search-empty">Search for a mock test.</div>
+        <div class="search-empty" data-i18n="searchHint">Search for a mock test.</div>
       </div>
     </div>
   </div>
 
+  <!-- ═══════════ CONFIG + SCRIPTS ═══════════ -->
   <script>
     window.PK_CONFIG = {
       API_BASE: "https://preparekora-worker.yadavsubba2003.workers.dev",
