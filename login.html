@@ -3,38 +3,47 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#eef1f6">
+  <meta name="theme-color" content="#fafafa">
+
   <title>Sign in — PrepareKora</title>
   <meta name="description" content="Log in to your PrepareKora account to continue your exam preparation.">
+  <meta name="robots" content="noindex, nofollow">
   <link rel="canonical" href="https://yadavwebtechnologies-softwares.github.io/preparekora/login.html">
+
   <link rel="icon" type="image/svg+xml" href="assets/icons/favicon.svg">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
+  <!-- ═══════════ HEADER ═══════════ -->
   <header class="header">
     <div class="header-inner">
       <a class="brand" href="index.html" aria-label="PrepareKora home">
         <span class="brand-main">preparekora</span><span class="brand-in">.in</span>
       </a>
-      <nav class="desktop-nav" aria-label="Desktop navigation">
+
+      <nav class="nav-desktop" aria-label="Primary navigation">
         <a href="about.html" data-i18n="navAbout">About</a>
         <a href="find-us.html" data-i18n="navFindUs">Find Us</a>
       </nav>
-      <div class="nav-actions">
+
+      <div class="header-actions">
         <div class="lang-switch" role="group" aria-label="Language">
           <button class="lang-btn is-active" type="button" data-lang="en" aria-pressed="true">EN</button>
           <button class="lang-btn" type="button" data-lang="as" aria-pressed="false">অসমীয়া</button>
         </div>
-        <button class="icon-button" id="menuToggle" type="button" aria-label="Open navigation menu" aria-expanded="false" aria-controls="menuPanel">
-          <svg class="pk-icon" viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M4 7h16"></path><path d="M4 12h16"></path><path d="M4 17h16"></path>
+
+        <button class="icon-btn" id="menuToggle" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="menuPanel">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M4 7h16"/><path d="M4 12h16"/><path d="M4 17h16"/>
           </svg>
         </button>
       </div>
+
       <nav class="menu-panel" id="menuPanel" aria-label="Mobile navigation">
         <a href="about.html" data-i18n="navAbout">About</a>
         <a href="find-us.html" data-i18n="navFindUs">Find Us</a>
+
         <div class="lang-switch" role="group" aria-label="Language">
           <button class="lang-btn is-active" type="button" data-lang="en" aria-pressed="true">EN</button>
           <button class="lang-btn" type="button" data-lang="as" aria-pressed="false">অসমীয়া</button>
@@ -43,11 +52,12 @@
     </div>
   </header>
 
-  <main class="page-container">
+  <!-- ═══════════ MAIN ═══════════ -->
+  <main class="page">
     <div class="auth-wrap">
       <div class="auth-card">
         <h1 data-i18n="loginTitle">Welcome back</h1>
-        <p class="muted-text" data-i18n="loginSubtitle">Log in to continue your preparation.</p>
+        <p data-i18n="loginSubtitle">Log in to continue your preparation.</p>
 
         <div id="loginError" class="auth-alert" hidden role="alert"></div>
 
@@ -64,8 +74,8 @@
             <div class="form-error" data-error-for="loginPassword" hidden></div>
           </div>
 
-          <div style="margin-bottom: 16px; text-align: right;">
-            <a href="forgot-password.html" style="font-size: 13px; color: var(--accent);" data-i18n="forgotPassword">Forgot password?</a>
+          <div style="margin-bottom: var(--sp-3); text-align: right;">
+            <a href="forgot-password.html" style="font-size: var(--fs-sm); font-weight: 500; color: var(--text-2);" data-i18n="forgotPassword">Forgot password?</a>
           </div>
 
           <button class="btn btn-primary btn-block" type="submit" id="loginBtn">
@@ -81,11 +91,12 @@
     </div>
   </main>
 
+  <!-- ═══════════ FOOTER ═══════════ -->
   <footer class="footer">
     <div class="footer-inner">
       <a href="index.html" class="footer-brand">PrepareKora.in</a>
       <div class="footer-copy">© <span id="currentYear"></span> PrepareKora.in</div>
-      <nav class="footer-links" aria-label="Footer navigation">
+      <nav class="footer-links" aria-label="Footer">
         <a href="about.html" data-i18n="navAbout">About</a>
         <a href="find-us.html" data-i18n="navFindUs">Find Us</a>
         <a href="terms.html" data-i18n="navTerms">Terms &amp; Privacy</a>
@@ -93,6 +104,7 @@
     </div>
   </footer>
 
+  <!-- ═══════════ CONFIG + SCRIPTS ═══════════ -->
   <script>
     window.PK_CONFIG = {
       API_BASE: "https://preparekora-worker.yadavsubba2003.workers.dev",
